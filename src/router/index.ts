@@ -5,6 +5,12 @@ const router = createRouter({
   routes: [
     {
       path: '/',
+      name: 'landing',
+      component: () => import('@/views/LandingView.vue'),
+      meta: { title: 'TAPE — live markets terminal', layout: 'landing' },
+    },
+    {
+      path: '/dashboard',
       name: 'overview',
       component: () => import('@/views/OverviewView.vue'),
       meta: { title: 'Overview' },
@@ -36,7 +42,11 @@ const router = createRouter({
 
 router.afterEach((to) => {
   const t = (to.meta?.title as string) || ''
-  document.title = t ? `TAPE · ${t}` : 'TAPE — live markets terminal'
+  if (to.meta?.layout === 'landing') {
+    document.title = 'TAPE — live markets terminal'
+  } else {
+    document.title = t ? `TAPE · ${t}` : 'TAPE — live markets terminal'
+  }
 })
 
 export default router

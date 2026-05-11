@@ -18,6 +18,7 @@
   --accent: #d4ff3a;
   --accent-ink: #0b0a08;
   --accent-soft: rgba(212, 255, 58, 0.14);
+  --accent-wash: rgba(212, 255, 58, 0.04);
   --accent-line: rgba(212, 255, 58, 0.42);
 
   --up: #7fe8a0;
@@ -53,6 +54,7 @@
   --accent: #2d6b1f;
   --accent-ink: #f3efe6;
   --accent-soft: rgba(45, 107, 31, 0.1);
+  --accent-wash: rgba(45, 107, 31, 0.03);
   --accent-line: rgba(45, 107, 31, 0.42);
 
   --up: #1e7a3a;
@@ -73,6 +75,8 @@
 :root {
 
   --font-display: 'Instrument Serif', 'Cormorant Garamond', Georgia, serif;
+  --font-tech: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
+  --font-glyph: 'Major Mono Display', 'Geist Mono', ui-monospace, monospace;
   --font-body: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 

@@ -38,7 +38,7 @@ onMounted(() => document.addEventListener('keydown', onKeydown))
 onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
 
 const NAV = [
-  { to: '/', label: 'Overview' },
+  { to: '/dashboard', label: 'Overview' },
   { to: '/markets/BTCUSDT', label: 'Markets', match: '/markets' },
   { to: '/activity', label: 'Activity' },
   { to: '/settings', label: 'Settings' },
