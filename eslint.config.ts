@@ -22,5 +22,15 @@ export default defineConfigWithVueTs(
 
   ...pluginOxlint.buildFromOxlintConfigFile('.oxlintrc.json'),
 
+  {
+    name: 'app/component-naming',
+    rules: {
+      'vue/multi-word-component-names': [
+        'error',
+        { ignores: ['Brand', 'Sparkline'] },
+      ],
+    },
+  },
+
   skipFormatting,
 )
