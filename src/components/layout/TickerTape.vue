@@ -5,7 +5,6 @@ import { formatPrice, formatPct } from '@/utils/format'
 
 const items = computed(() => {
   const bySym = new Map(SYMBOLS.map((s) => [s.symbol, s]))
-  // duplicate sequence for seamless marquee
   const arr = FIXTURE_TICKERS.map((t) => ({
     ...t,
     info: bySym.get(t.symbol)!,

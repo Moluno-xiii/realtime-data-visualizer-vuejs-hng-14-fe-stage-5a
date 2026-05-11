@@ -3,15 +3,26 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { FIXTURE_TICKERS, SYMBOLS } from '@/mocks/fixtures'
 import { formatPrice, formatPct } from '@/utils/format'
+import { useWatchlist } from '@/composables/useWatchlist'
+import { useOverlays } from '@/composables/useOverlays'
+import { useHeartbeat } from '@/composables/useHeartbeat'
 
 const route = useRoute()
+const { symbols } = useWatchlist()
+const { openSymbolPicker } = useOverlays()
+const { msgsPerSec } = useHeartbeat()
 
 const rows = computed(() => {
   const bySym = new Map(SYMBOLS.map((s) => [s.symbol, s]))
-  return FIXTURE_TICKERS.map((t) => ({
-    ...t,
-    info: bySym.get(t.symbol)!,
-  }))
+  const tickerBy = new Map(FIXTURE_TICKERS.map((t) => [t.symbol, t]))
+  return symbols.value
+    .map((sym) => {
+      const t = tickerBy.get(sym)
+      const info = bySym.get(sym)
+      if (!t || !info) return null
+      return { ...t, info }
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null)
 })
 
 function isActive(symbol: string) {
@@ -23,7 +34,13 @@ function isActive(symbol: string) {
   <aside class="rail">
     <div class="rail__head">
       <span class="eyebrow">Watchlist</span>
-      <button class="rail__add" type="button" aria-label="Add symbol">+</button>
+      <button
+        class="rail__add"
+        type="button"
+        aria-label="Manage watchlist"
+        title="Manage watchlist"
+        @click="openSymbolPicker"
+      >+</button>
     </div>
     <hr class="rule" />
     <ul class="rail__list" role="list">
@@ -53,11 +70,11 @@ function isActive(symbol: string) {
     <div class="rail__foot">
       <div class="rail__stat">
         <span class="eyebrow">Streams</span>
-        <span class="mono rail__stat-val">{{ rows.length }}/24</span>
+        <span class="mono rail__stat-val">{{ rows.length }}/{{ SYMBOLS.length }}</span>
       </div>
       <div class="rail__stat">
         <span class="eyebrow">Msgs/s</span>
-        <span class="mono rail__stat-val">214</span>
+        <span class="mono rail__stat-val">{{ Math.round(msgsPerSec) }}</span>
       </div>
     </div>
   </aside>

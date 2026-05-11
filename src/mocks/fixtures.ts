@@ -34,7 +34,6 @@ const BASE_PRICE: Record<string, number> = {
   MATICUSDT: 0.7912,
 }
 
-/* deterministic pseudo-random so screenshots stay stable on reload */
 function mulberry32(seed: number) {
   let a = seed >>> 0
   return () => {
@@ -52,10 +51,6 @@ function seedFor(symbol: string) {
   return Math.abs(h) || 1
 }
 
-/**
- * Generate a smooth geometric-Brownian-like series. Returns N points spaced
- * `stepMs` apart, ending at `endTime`.
- */
 export function generateSeries(
   symbol: string,
   points: number,

@@ -46,7 +46,6 @@ body {
   overflow-x: hidden;
 }
 
-/* film grain overlay — global */
 body::before {
   content: '';
   position: fixed;
@@ -90,7 +89,6 @@ textarea {
   color: var(--accent-ink);
 }
 
-/* scrollbar — slim, on-brand */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--border-hi) transparent;
@@ -110,7 +108,6 @@ textarea {
   background: var(--ink-faint);
 }
 
-/* tabular numerics everywhere by default */
 .num,
 .mono {
   font-family: var(--font-mono);

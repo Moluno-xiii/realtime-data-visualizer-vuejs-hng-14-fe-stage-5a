@@ -1,4 +1,4 @@
-/* TAPE — design tokens */
+
 
 :root[data-theme='dark'] {
   --bg: #0b0a08;
@@ -71,7 +71,7 @@
 }
 
 :root {
-  /* type */
+
   --font-display: 'Instrument Serif', 'Cormorant Garamond', Georgia, serif;
   --font-body: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
@@ -94,7 +94,7 @@
   --tracking-mid: 0.08em;
   --tracking-tight: -0.01em;
 
-  /* space */
+
   --s-1: 4px;
   --s-2: 8px;
   --s-3: 12px;
@@ -106,27 +106,43 @@
   --s-9: 56px;
   --s-10: 72px;
 
-  /* radii — sharp by default, soft on inputs/pills */
+
   --r-0: 0px;
   --r-1: 2px;
   --r-2: 4px;
   --r-pill: 999px;
 
-  /* motion */
+
   --ease-out: cubic-bezier(0.2, 0.65, 0.18, 1);
   --ease-in-out: cubic-bezier(0.62, 0, 0.18, 1);
   --t-fast: 120ms;
   --t-mid: 240ms;
   --t-slow: 480ms;
 
-  /* layout */
+
   --rail-w: 240px;
   --side-w: 320px;
   --top-h: 56px;
   --tape-h: 32px;
   --maxw: 1680px;
 
+  --row-h: 32px;
+  --pad-y: 8px;
+
   color-scheme: dark;
+}
+
+:root[data-density='compact'] {
+  --s-3: 8px;
+  --s-4: 12px;
+  --s-5: 16px;
+  --s-6: 18px;
+  --s-7: 24px;
+  --row-h: 26px;
+  --pad-y: 5px;
+  --rail-w: 220px;
+  --top-h: 48px;
+  --tape-h: 28px;
 }
 
 :root[data-theme='light'] {

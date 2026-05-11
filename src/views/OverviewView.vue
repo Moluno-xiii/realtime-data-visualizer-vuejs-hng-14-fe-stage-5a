@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import ChartCard from '@/components/cards/ChartCard.vue'
 import MetricCard from '@/components/cards/MetricCard.vue'
 import PriceChart from '@/components/charts/PriceChart.vue'
@@ -7,6 +7,8 @@ import VolumeBarChart from '@/components/charts/VolumeBarChart.vue'
 import ActivityFeed from '@/components/feed/ActivityFeed.vue'
 import SegmentedControl from '@/components/controls/SegmentedControl.vue'
 import PauseResume from '@/components/controls/PauseResume.vue'
+import { usePause } from '@/composables/usePause'
+import { useHeartbeat } from '@/composables/useHeartbeat'
 import {
   FIXTURE_ACTIVITY,
   FIXTURE_TICKERS,
@@ -23,7 +25,18 @@ import type { ChartKind, TimeRange } from '@/types/market'
 
 const range = ref<TimeRange>('1h')
 const kind = ref<Exclude<ChartKind, 'candle'>>('area')
-const paused = ref(false)
+const { paused, toggle: togglePause } = usePause()
+const { msgsPerSec, latencyMs } = useHeartbeat()
+const tick = ref(0)
+let tickerId: number | undefined
+onMounted(() => {
+  tickerId = window.setInterval(() => {
+    if (!paused.value) tick.value++
+  }, 1500)
+})
+onBeforeUnmount(() => {
+  if (tickerId) clearInterval(tickerId)
+})
 
 const RANGE_OPTS = [
   { value: '1m' as TimeRange, label: '1m' },
@@ -57,11 +70,29 @@ const pointsByRange: Record<TimeRange, number> = {
   live: 90,
 }
 
-const heroSeries = computed(() =>
-  generateSeries('BTCUSDT', pointsByRange[range.value], stepMs[range.value]),
-)
+const heroSeries = computed(() => {
+  const step = stepMs[range.value]
+  const base = generateSeries(
+    'BTCUSDT',
+    pointsByRange[range.value],
+    step,
+    Date.now(),
+  )
+  const drift = tick.value
+  if (drift > 0 && base.length > 2) {
+    const last = base[base.length - 1]!
+    const t = drift % 7
+    const sign = (drift & 1) === 0 ? 1 : -1
+    const nudge = sign * (0.0008 + (t / 7) * 0.0006) * last.v
+    base[base.length - 1] = { t: last.t, v: Math.max(0.01, last.v + nudge) }
+  }
+  return base
+})
 
-const btcCandles = computed(() => generateCandles('BTCUSDT', 96, 15 * 60_000))
+const btcCandles = computed(() => {
+  void tick.value
+  return generateCandles('BTCUSDT', 96, 15 * 60_000)
+})
 
 const tickerBy = computed(() => {
   const m = new Map(FIXTURE_TICKERS.map((t) => [t.symbol, t]))
@@ -153,7 +184,7 @@ const totalVolume = computed(() =>
             :options="KIND_OPTS"
             aria-label="Chart type"
           />
-          <PauseResume v-model:paused="paused" />
+          <PauseResume :paused="paused" @update:paused="togglePause" />
         </template>
         <PriceChart :series="heroSeries" :kind="kind" :height="340" />
         <template #footer>
@@ -161,7 +192,11 @@ const totalVolume = computed(() =>
             <span class="legend__dot" style="background: var(--up)"></span>
             <span class="legend__lab">spot · 1m candle reconstruction</span>
             <span class="legend__sep"></span>
-            <span class="mono muted-tone">214 msg/s · 38 ms latency · last tick {{ new Date().toLocaleTimeString('en-US', { hour12: false }) }}</span>
+            <span class="mono muted-tone">
+              {{ Math.round(msgsPerSec) }} msg/s ·
+              {{ Math.max(1, Math.round(16.67 + latencyMs)) }} ms latency ·
+              last tick {{ new Date().toLocaleTimeString('en-US', { hour12: false }) }}
+            </span>
           </div>
         </template>
       </ChartCard>

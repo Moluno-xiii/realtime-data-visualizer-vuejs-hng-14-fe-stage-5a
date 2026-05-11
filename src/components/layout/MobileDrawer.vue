@@ -4,11 +4,15 @@ import { useRoute } from 'vue-router'
 import { FIXTURE_TICKERS, SYMBOLS } from '@/mocks/fixtures'
 import { formatPct, formatPrice } from '@/utils/format'
 import { useMobileDrawer } from '@/composables/useMobileDrawer'
+import { useWatchlist } from '@/composables/useWatchlist'
+import { useOverlays } from '@/composables/useOverlays'
 import Brand from './Brand.vue'
 import ThemeToggle from '@/components/controls/ThemeToggle.vue'
 import StatusPill from '@/components/controls/StatusPill.vue'
 
 const { open, hide } = useMobileDrawer()
+const { symbols } = useWatchlist()
+const { openSymbolPicker } = useOverlays()
 const route = useRoute()
 
 const NAV = [
@@ -25,8 +29,21 @@ function isActive(item: { to: string; match?: string }) {
 
 const watchlist = computed(() => {
   const by = new Map(SYMBOLS.map((s) => [s.symbol, s]))
-  return FIXTURE_TICKERS.map((t) => ({ ...t, info: by.get(t.symbol)! }))
+  const tickerBy = new Map(FIXTURE_TICKERS.map((t) => [t.symbol, t]))
+  return symbols.value
+    .map((sym) => {
+      const t = tickerBy.get(sym)
+      const info = by.get(sym)
+      if (!t || !info) return null
+      return { ...t, info }
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null)
 })
+
+function manage() {
+  hide()
+  openSymbolPicker()
+}
 
 watch(
   () => route.fullPath,
@@ -102,6 +119,9 @@ onBeforeUnmount(() => {
 
         <div class="drawer__section">
           <span class="eyebrow">Watchlist</span>
+          <button type="button" class="drawer__manage" @click="manage">
+            Manage
+          </button>
         </div>
         <hr class="rule" />
         <ul class="drawer__list" role="list">
@@ -220,7 +240,23 @@ onBeforeUnmount(() => {
 }
 
 .drawer__section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 12px 16px 6px;
+}
+.drawer__manage {
+  font-size: var(--fs-xs);
+  letter-spacing: var(--tracking-mid);
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  border: 1px solid var(--border);
+  border-radius: var(--r-1);
+  padding: 4px 8px;
+}
+.drawer__manage:hover {
+  color: var(--ink);
+  border-color: var(--border-hi);
 }
 .drawer__list {
   list-style: none;
@@ -287,7 +323,6 @@ onBeforeUnmount(() => {
   font-size: var(--fs-xs);
 }
 
-/* transitions */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 200ms var(--ease-out);
