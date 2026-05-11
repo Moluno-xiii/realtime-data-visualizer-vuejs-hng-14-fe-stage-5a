@@ -1,0 +1,225 @@
+:rocket: Frontend Wizards — Stage 5A @channel
+Build a Real-Time Data Visualization Platform using Vuejs
+
+:dart: Objective
+Build a high-performance real-time analytics dashboard that visualizes live-streaming data with smooth updates, advanced charts, and interactive insights.
+The platform should simulate a modern monitoring/analytics system similar to:
+trading terminals
+DevOps monitoring dashboards
+cybersecurity analytics
+IoT telemetry platforms
+logistics tracking systems
+This must feel like a production-grade real-time visualization platform.
+
+:brain: What the Platform Should Do
+The application must:
+Receive real-time streaming data
+Visualize updates instantly
+Handle large datasets efficiently
+Allow users to filter and inspect data
+Present insights in a clean, highly interactive UI
+The dashboard should feel “alive.”
+
+:jigsaw: Required Features
+
+:one: Real-Time Data Streaming
+Your application must simulate or consume real-time data.
+Accepted approaches:
+WebSockets
+Server-Sent Events (SSE)
+polling (least preferred)
+mocked streaming generator
+Examples of live data:
+stock prices
+sensor metrics
+CPU/memory usage
+logistics movement
+crypto prices
+cybersecurity attacks
+website analytics
+The UI must update dynamically without page refreshes.
+
+:two: Live Charts & Visualizations
+The dashboard must include at least:
+:white_check_mark: Line chart
+:white_check_mark: Bar chart
+:white_check_mark: Area chart
+:white_check_mark: Real-time metric cards
+:white_check_mark: Activity feed/table
+Charts must:
+update smoothly
+avoid flickering
+support responsive layouts
+handle growing datasets efficiently
+Bonus:
+heatmaps
+candlestick charts
+radar charts
+network graphs
+geographic visualizations
+
+:three: Interactive Dashboard Controls
+Users must be able to:
+filter data
+pause/resume streaming
+change time ranges
+switch chart types
+inspect data points
+toggle datasets on/off
+Examples:
+Last 1 min
+Last 5 mins
+Last 1 hour
+Real-time mode
+
+:four: Performance Optimization
+This stage heavily evaluates frontend performance.
+You must:
+prevent unnecessary re-renders
+efficiently handle streaming updates
+optimize chart rendering
+avoid memory leaks
+clean up subscriptions/listeners
+Expected techniques:
+memoization
+virtualization
+throttling/debouncing
+Web Workers (optional)
+efficient state updates
+
+:five: Data Architecture
+Your application must demonstrate clean frontend architecture.
+Expected:
+centralized data handling
+reusable chart components
+modular folder structure
+typed data models
+scalable state management
+Suggested tools:
+Zustand
+Redux Toolkit
+TanStack Query
+RxJS (optional)
+
+:six: Responsive UI
+The dashboard must work properly on:
+desktop
+tablet
+mobile
+Requirements:
+adaptive layouts
+usable charts on smaller screens
+readable typography
+proper spacing
+
+:seven: Real-Time Activity Feed
+Include a live-updating table/feed showing:
+recent events
+alerts
+logs
+transactions
+metric updates
+Requirements:
+newest items appear first
+smooth updates
+timestamp formatting
+scroll handling
+Bonus:
+severity indicators
+searchable logs
+filtering
+infinite scrolling
+
+:eight: Error Handling & Resilience
+Your app must gracefully handle:
+connection failures
+malformed data
+reconnect attempts
+loading states
+empty states
+The UI should never crash due to bad incoming data.
+
+:package: Technical Requirements
+Must use:
+TypeScript
+Component-based architecture
+Must include:
+reusable chart components
+modular code organization
+clean state management
+proper loading/error states
+no console errors
+Suggested libraries:
+Recharts
+ECharts
+D3.js
+Chart.js
+Visx
+TanStack Table
+
+:closed_lock_with_key: Security & Stability Requirements
+You must:
+sanitize external data
+validate incoming payloads
+prevent memory leaks
+clean up intervals/listeners
+avoid unsafe DOM injection
+Bonus:
+rate limiting
+reconnect backoff strategy
+payload schema validation
+
+:iphone: UI/UX Expectations
+The dashboard should feel modern and high-end.
+Expected:
+smooth transitions
+polished charts
+responsive interactions
+clear hierarchy
+proper spacing
+dark/light mode support
+Optional enhancements:
+command palette
+draggable widgets
+customizable layouts
+animated counters
+live notifications
+sound alerts
+keyboard shortcuts
+
+:test_tube: Acceptance Criteria
+You will be graded on:
+:white_check_mark: Real-time updates working correctly
+:white_check_mark: Smooth chart rendering
+:white_check_mark: Performance under continuous updates
+:white_check_mark: Clean architecture
+:white_check_mark: Proper state management
+:white_check_mark: Good UX polish
+:white_check_mark: Responsiveness
+:white_check_mark: Error handling
+:white_check_mark: Efficient rendering strategy
+:white_check_mark: Scalability of implementation
+:package: Submission Requirements
+Submit:
+:white_check_mark: GitHub repository
+:white_check_mark: README including:
+setup instructions
+architecture explanation
+state management strategy
+rendering optimization decisions
+data streaming approach
+trade-offs made
+
+:trophy: Evaluation Focus
+This stage prioritizes:
+frontend architecture quality
+rendering performance
+real-time systems thinking
+scalability
+interaction design
+UI polish
+engineering maturity
+
+Submisson Form https://docs.google.com/forms/d/e/1FAIpQLScoAEuq1ACg5g9FcsRDtZlglEOYBGziTg-zOB5T-D-t4kgmRw/viewform?usp=dialog
+
+Deadline : 11:59AM, 15th May 2026
