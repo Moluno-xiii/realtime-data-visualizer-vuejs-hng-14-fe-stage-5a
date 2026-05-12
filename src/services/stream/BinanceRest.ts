@@ -54,7 +54,17 @@ export class BinanceRest {
     return out
   }
 
-  async fetchSymbols(quoteAsset = 'USDT'): Promise<SymbolInfo[]> {
+  async fetchSymbols(
+    quoteAssets: string[] = [
+      'USDT',
+      'USDC',
+      'FDUSD',
+      'TUSD',
+      'BTC',
+      'ETH',
+      'BNB',
+    ],
+  ): Promise<SymbolInfo[]> {
     const res = await fetch(`${this.base}/exchangeInfo`)
     if (!res.ok) throw new Error(`exchangeInfo: ${res.status}`)
     const data = await res.json()
@@ -71,20 +81,32 @@ export class BinanceRest {
     })
     const parsed = ExchangeInfo.safeParse(data)
     if (!parsed.success) throw new Error('exchangeInfo: bad shape')
-    return parsed.data.symbols
-      .filter(
-        (s) =>
-          s.status === 'TRADING' &&
-          s.quoteAsset === quoteAsset &&
-          s.isSpotTradingAllowed !== false,
-      )
-      .map((s) => ({
-        symbol: s.symbol,
-        name: s.baseAsset,
-        base: s.baseAsset,
-        quote: s.quoteAsset,
-        icon: s.baseAsset.charAt(0),
-      }))
+    const priority = new Map(quoteAssets.map((q, i) => [q, i]))
+    const byBase = new Map<string, { quote: string; symbol: string }>()
+    for (const s of parsed.data.symbols) {
+      if (s.status !== 'TRADING') continue
+      if (s.isSpotTradingAllowed === false) continue
+      const p = priority.get(s.quoteAsset)
+      if (p === undefined) continue
+      const cur = byBase.get(s.baseAsset)
+      if (!cur) {
+        byBase.set(s.baseAsset, { quote: s.quoteAsset, symbol: s.symbol })
+        continue
+      }
+      const curP = priority.get(cur.quote)!
+      if (p < curP) byBase.set(s.baseAsset, { quote: s.quoteAsset, symbol: s.symbol })
+    }
+    const result: SymbolInfo[] = []
+    for (const [base, entry] of byBase) {
+      result.push({
+        symbol: entry.symbol,
+        name: base,
+        base,
+        quote: entry.quote,
+        icon: base.charAt(0),
+      })
+    }
+    return result
   }
 
   async fetchTickers(symbols: string[]): Promise<Ticker[]> {

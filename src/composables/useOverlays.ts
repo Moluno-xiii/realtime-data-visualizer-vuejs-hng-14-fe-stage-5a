@@ -2,6 +2,7 @@ import { ref } from 'vue'
 
 const symbolPicker = ref(false)
 const commandPalette = ref(false)
+const marketSwitcher = ref(false)
 
 export function useOverlays() {
   function openSymbolPicker() {
@@ -19,13 +20,22 @@ export function useOverlays() {
   function toggleCommandPalette() {
     commandPalette.value = !commandPalette.value
   }
+  function openMarketSwitcher() {
+    marketSwitcher.value = true
+  }
+  function closeMarketSwitcher() {
+    marketSwitcher.value = false
+  }
   return {
     symbolPicker,
     commandPalette,
+    marketSwitcher,
     openSymbolPicker,
     closeSymbolPicker,
     openCommandPalette,
     closeCommandPalette,
     toggleCommandPalette,
+    openMarketSwitcher,
+    closeMarketSwitcher,
   }
 }

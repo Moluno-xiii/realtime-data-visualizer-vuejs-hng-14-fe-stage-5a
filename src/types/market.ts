@@ -60,6 +60,8 @@ export type TimeRange =
   | '15m'
   | '1h'
   | '4h'
+  | '24h'
+  | '28h'
   | '1mo'
   | '3mo'
   | '6mo'

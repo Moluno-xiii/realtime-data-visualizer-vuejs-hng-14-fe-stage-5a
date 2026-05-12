@@ -20,11 +20,11 @@ const filtered = computed(() =>
 </script>
 
 <template>
-  <div class="av">
-    <header class="av__head">
+  <div class="flex flex-col gap-5 p-6 max-w-[1200px] mx-auto max-md:p-4">
+    <header class="flex flex-col gap-2">
       <span class="eyebrow">The Tape</span>
-      <h1 class="display av__title">Activity, in order.</h1>
-      <p class="av__sub">
+      <h1 class="display m-0 text-[clamp(40px,6vw,64px)]">Activity, in order.</h1>
+      <p class="m-0 text-ink-dim text-lg max-w-[60ch]">
         Every alert, signal, and notable trade for the markets you watch —
         newest first. Filter by severity or search by symbol.
       </p>
@@ -36,53 +36,13 @@ const filtered = computed(() =>
       title="No symbols to track"
       body="The tape mirrors your watchlist. Pin a market to start receiving trade prints, alerts, and signals."
       cta="Add symbols"
-      class="av__empty"
+      class="max-w-[540px]"
       @action="openSymbolPicker"
     />
     <ChartCard v-else title="Recent events" eyebrow="Live tape">
-      <div class="av__feed">
+      <div class="h-[640px] max-md:h-[70vh]">
         <ActivityFeed :events="filtered" />
       </div>
     </ChartCard>
   </div>
 </template>
-
-<style scoped>
-.av {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-5);
-  padding: var(--s-6);
-  max-width: 1200px;
-  margin: 0 auto;
-}
-.av__head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-2);
-}
-.av__title {
-  margin: 0;
-  font-size: clamp(40px, 6vw, 64px);
-}
-.av__sub {
-  margin: 0;
-  color: var(--ink-dim);
-  font-size: var(--fs-lg);
-  max-width: 60ch;
-}
-.av__feed {
-  height: 640px;
-}
-.av__empty {
-  max-width: 540px;
-}
-@media (max-width: 960px) {
-  .av {
-    padding: var(--s-4);
-  }
-  .av__feed {
-    height: 70vh;
-  }
-}
-</style>

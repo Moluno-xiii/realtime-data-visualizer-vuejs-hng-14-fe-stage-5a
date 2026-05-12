@@ -33,19 +33,19 @@ function isActive(symbol: string) {
 </script>
 
 <template>
-  <aside class="rail">
-    <div class="rail__head">
+  <aside class="rail w-[var(--rail-w)] flex flex-col bg-bg border-r border-rule h-full min-h-0">
+    <div class="flex items-center justify-between px-4 pt-4 pb-3">
       <span class="eyebrow">Watchlist</span>
       <button
-        class="rail__add"
         type="button"
+        class="w-[22px] h-[22px] border border-border rounded-1 text-ink-mute text-sm leading-none hover:text-ink hover:border-border-hi"
         aria-label="Manage watchlist"
         title="Manage watchlist"
         @click="openSymbolPicker"
       >+</button>
     </div>
     <hr class="rule" />
-    <div v-if="!rows.length" class="rail__empty">
+    <div v-if="!rows.length" class="flex-1 min-h-0 p-[14px] overflow-y-auto">
       <EmptyState
         compact
         eyebrow="Watchlist"
@@ -55,161 +55,51 @@ function isActive(symbol: string) {
         @action="openSymbolPicker"
       />
     </div>
-    <ul v-else class="rail__list" role="list">
+    <ul v-else class="list-none m-0 py-1 overflow-y-auto flex-1 min-h-0" role="list">
       <li v-for="r in rows" :key="r.symbol">
         <RouterLink
           :to="`/markets/${r.symbol}`"
-          class="row"
-          :class="{ 'row--active': isActive(r.symbol) }"
+          class="flex items-center justify-between gap-3 py-[7px] px-4 text-ink-dim border-l-[2px] border-transparent transition-colors hover:bg-surface hover:text-ink"
+          :class="
+            isActive(r.symbol)
+              ? '!bg-surface !text-ink !border-l-accent'
+              : ''
+          "
         >
-          <span class="row__sym">
-            <span class="row__icon" aria-hidden="true">{{ r.info.icon }}</span>
-            <span class="row__base">{{ r.info.base }}</span>
-            <span class="row__quote">/{{ r.info.quote }}</span>
+          <span class="inline-flex items-baseline gap-[6px] text-sm">
+            <span class="w-4 inline-block text-center text-ink-mute" aria-hidden="true">{{ r.info.icon }}</span>
+            <span class="font-semibold tracking-[0.04em]">{{ r.info.base }}</span>
+            <span class="text-ink-faint text-xs">/{{ r.info.quote }}</span>
           </span>
-          <span class="row__values">
-            <span class="row__price mono">
+          <span class="inline-flex flex-col items-end gap-[1px]">
+            <span class="text-sm text-ink font-mono">
               {{ r.ticker ? formatPrice(r.ticker.price) : '—' }}
             </span>
             <span
-              class="row__chg mono"
+              class="text-xs font-mono"
               :class="r.ticker && r.ticker.changePct24h >= 0 ? 'up' : 'down'"
-            >{{ r.ticker ? formatPct(r.ticker.changePct24h) : '—' }}</span>
+            >
+              {{ r.ticker ? formatPct(r.ticker.changePct24h) : '—' }}
+            </span>
           </span>
         </RouterLink>
       </li>
     </ul>
     <hr class="rule" />
-    <div class="rail__foot">
-      <div class="rail__stat">
+    <div class="grid grid-cols-2 px-4 py-3">
+      <div class="flex flex-col gap-[2px]">
         <span class="eyebrow">Streams</span>
-        <span class="mono rail__stat-val">{{ rows.length }}</span>
+        <span class="text-sm text-ink font-mono">{{ rows.length }}</span>
       </div>
-      <div class="rail__stat">
+      <div class="flex flex-col gap-[2px]">
         <span class="eyebrow">Msgs/s</span>
-        <span class="mono rail__stat-val">{{ Math.round(msgsPerSec) }}</span>
+        <span class="text-sm text-ink font-mono">{{ Math.round(msgsPerSec) }}</span>
       </div>
     </div>
   </aside>
 </template>
 
 <style scoped>
-.rail {
-  width: var(--rail-w);
-  display: flex;
-  flex-direction: column;
-  background: var(--bg);
-  border-right: 1px solid var(--rule);
-  height: 100%;
-  min-height: 0;
-}
-
-.rail__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--s-4) var(--s-4) var(--s-3);
-}
-.rail__add {
-  width: 22px;
-  height: 22px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-1);
-  color: var(--ink-mute);
-  font-size: 14px;
-  line-height: 1;
-}
-.rail__add:hover {
-  color: var(--ink);
-  border-color: var(--border-hi);
-}
-
-.rail__list {
-  list-style: none;
-  margin: 0;
-  padding: 4px 0;
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-}
-.rail__empty {
-  flex: 1;
-  min-height: 0;
-  padding: 14px;
-  overflow-y: auto;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s-3);
-  padding: 7px var(--s-4);
-  color: var(--ink-dim);
-  border-left: 2px solid transparent;
-  transition: background var(--t-fast) var(--ease-out);
-}
-.row:hover {
-  background: var(--surface);
-  color: var(--ink);
-}
-.row--active {
-  background: var(--surface);
-  color: var(--ink);
-  border-left-color: var(--accent);
-}
-
-.row__sym {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  font-size: var(--fs-sm);
-}
-.row__icon {
-  width: 16px;
-  display: inline-block;
-  text-align: center;
-  color: var(--ink-mute);
-}
-.row__base {
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-.row__quote {
-  color: var(--ink-faint);
-  font-size: var(--fs-xs);
-}
-
-.row__values {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 1px;
-}
-.row__price {
-  font-size: var(--fs-sm);
-  color: var(--ink);
-}
-.row__chg {
-  font-size: var(--fs-xs);
-}
-
-.rail__foot {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
-  padding: var(--s-3) var(--s-4);
-}
-.rail__stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.rail__stat-val {
-  color: var(--ink);
-  font-size: var(--fs-sm);
-}
-
 @media (max-width: 960px) {
   .rail {
     display: none;

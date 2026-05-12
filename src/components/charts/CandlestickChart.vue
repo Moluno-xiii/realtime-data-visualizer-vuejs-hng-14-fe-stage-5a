@@ -126,13 +126,7 @@ const option = computed(() => {
 
 <template>
   <ChartLoading v-if="!candles.length" :height="height" />
-  <div v-else class="cs" :style="{ height: `${height}px` }">
+  <div v-else class="w-full" :style="{ height: `${height}px` }">
     <VChart :option="option" :autoresize="true" />
   </div>
 </template>
-
-<style scoped>
-.cs {
-  width: 100%;
-}
-</style>

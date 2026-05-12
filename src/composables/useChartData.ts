@@ -16,6 +16,8 @@ export const RANGE_CONFIG: Record<TimeRange, RangeSpec> = {
   '15m': { interval: '1m', limit: 240, windowMs: 60 * 60_000 },
   '1h': { interval: '1m', limit: 240, windowMs: 4 * 60 * 60_000 },
   '4h': { interval: '5m', limit: 240, windowMs: 24 * 60 * 60_000 },
+  '24h': { interval: '15m', limit: 96 },
+  '28h': { interval: '15m', limit: 112 },
   '1mo': { interval: '1h', limit: 720 },
   '3mo': { interval: '4h', limit: 540 },
   '6mo': { interval: '1d', limit: 180 },

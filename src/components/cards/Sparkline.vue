@@ -38,7 +38,9 @@ const path = computed(() => {
     const y = h - pad - ((v - min) / range) * (h - pad * 2)
     return [x, y] as const
   })
-  const line = coords.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)} ${y.toFixed(2)}`).join(' ')
+  const line = coords
+    .map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)} ${y.toFixed(2)}`)
+    .join(' ')
   const last = coords[coords.length - 1]!
   const first = coords[0]!
   const area = `${line} L${last[0].toFixed(2)} ${h - pad} L${first[0].toFixed(2)} ${h - pad} Z`
@@ -53,8 +55,8 @@ const id = `spk-${Math.random().toString(36).slice(2, 8)}`
     :width="width"
     :height="height"
     :viewBox="`0 0 ${width} ${height}`"
-    class="spk"
-    :class="`spk--${dir}`"
+    class="block"
+    :class="dir === 'up' ? 'text-up' : 'text-down'"
   >
     <defs>
       <linearGradient :id="`${id}-grad`" x1="0" y1="0" x2="0" y2="1">
@@ -73,15 +75,3 @@ const id = `spk-${Math.random().toString(36).slice(2, 8)}`
     />
   </svg>
 </template>
-
-<style scoped>
-.spk {
-  display: block;
-}
-.spk--up {
-  color: var(--up);
-}
-.spk--down {
-  color: var(--down);
-}
-</style>

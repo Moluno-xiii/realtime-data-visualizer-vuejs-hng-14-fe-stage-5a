@@ -82,117 +82,140 @@ const PILLARS = [
 </script>
 
 <template>
-  <div class="lp">
+  <div class="lp min-h-dvh flex flex-col bg-bg relative font-body">
     <TickerTape />
 
-    <header class="lp__bar">
+    <header class="lp-bar sticky top-0 z-30 flex items-center justify-between gap-5 px-6 py-3 border-b border-rule backdrop-blur-[12px] bg-[color-mix(in_srgb,var(--bg)_80%,transparent)]">
       <Brand />
-      <nav class="lp__nav" aria-label="Page sections">
-        <a href="#pillars" class="lp__nav-item">Why</a>
-        <a href="#capabilities" class="lp__nav-item">Capabilities</a>
-        <a href="#numbers" class="lp__nav-item">Numbers</a>
+      <nav class="lp-nav inline-flex gap-[2px]" aria-label="Page sections">
+        <a href="#pillars" class="px-[10px] py-[6px] text-xs uppercase tracking-[0.08em] text-ink-mute hover:text-ink transition-colors">Why</a>
+        <a href="#capabilities" class="px-[10px] py-[6px] text-xs uppercase tracking-[0.08em] text-ink-mute hover:text-ink transition-colors">Capabilities</a>
+        <a href="#numbers" class="px-[10px] py-[6px] text-xs uppercase tracking-[0.08em] text-ink-mute hover:text-ink transition-colors">Numbers</a>
       </nav>
-      <div class="lp__bar-r">
+      <div class="inline-flex items-center gap-3">
         <ThemeToggle />
-        <RouterLink to="/dashboard" class="lp__cta lp__cta--sm">
+        <RouterLink to="/dashboard" class="lp-cta lp-cta-sm">
           Open terminal
-          <span aria-hidden="true" class="lp__cta-arrow">→</span>
+          <span aria-hidden="true" class="lp-arrow font-mono">→</span>
         </RouterLink>
       </div>
     </header>
 
-    <main class="lp__main">
-      <section class="hero">
-        <div class="hero__grid" aria-hidden="true"></div>
-        <div class="hero__mark" aria-hidden="true">TAPE</div>
-        <div class="hero__copy">
-          <p class="hero__eyebrow rise" style="--d: 60ms">
-            <span class="hero__eyebrow-dot" aria-hidden="true"></span>
+    <main class="flex-1">
+      <section class="hero relative grid grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] items-center gap-[clamp(28px,4vw,56px)] py-[clamp(36px,8vw,96px)] px-[clamp(20px,4vw,56px)] pb-[clamp(48px,9vw,120px)] overflow-hidden">
+        <div class="hero-grid absolute inset-0 pointer-events-none opacity-55" aria-hidden="true"></div>
+        <div class="hero-mark absolute -bottom-[2vw] -right-[3vw] font-glyph text-[clamp(200px,24vw,480px)] leading-[0.78] tracking-[-0.02em] text-ink opacity-[0.025] pointer-events-none select-none lowercase" aria-hidden="true">TAPE</div>
+        <div class="relative z-[1] flex flex-col gap-[18px] max-w-[640px]">
+          <p
+            class="rise self-start inline-flex items-center gap-2 m-0 font-body text-xs uppercase tracking-[0.18em] text-ink-mute px-[10px] py-[6px] pl-2 border border-border rounded-pill bg-surface"
+            style="--d: 60ms"
+          >
+            <span class="w-[6px] h-[6px] rounded-full bg-accent shadow-[0_0_6px_var(--accent)] animate-pulse-dot" aria-hidden="true"></span>
             LIVE MARKETS TERMINAL · v0.1
           </p>
-          <h1 class="hero__title">
-            <span class="rise" style="--d: 140ms">Markets,</span>
-            <em class="hero__live rise" style="--d: 320ms">live</em>
-            <span class="hero__period rise" style="--d: 460ms">.</span>
+          <h1 class="hero-title m-0 font-tech font-extrabold text-[clamp(52px,9vw,124px)] leading-[0.92] tracking-[-0.045em] text-ink inline-flex items-baseline flex-wrap gap-x-[18px] lowercase">
+            <span class="rise" style="--d: 140ms">markets,</span>
+            <em class="hero-live rise relative inline-block text-accent not-italic" style="--d: 320ms">live</em>
+            <span class="rise text-accent" style="--d: 460ms">.</span>
           </h1>
-          <p class="hero__sub rise" style="--d: 600ms">
+          <p class="rise m-0 text-ink-dim text-[clamp(15px,1.4vw,18px)] leading-[1.55] max-w-[56ch]" style="--d: 600ms">
             A streaming terminal for retail traders who want pro-grade signal —
             without the seven-monitor setup. Watch price, momentum, and the order
             book breathe in real time.
           </p>
-          <div class="hero__cta-row rise" style="--d: 760ms">
-            <RouterLink to="/dashboard" class="lp__cta">
+          <div class="rise inline-flex items-center gap-4 mt-2 flex-wrap" style="--d: 760ms">
+            <RouterLink to="/dashboard" class="lp-cta">
               Open the terminal
-              <span aria-hidden="true" class="lp__cta-arrow">→</span>
+              <span aria-hidden="true" class="lp-arrow font-mono">→</span>
             </RouterLink>
-            <span class="hero__hint">
-              <kbd>⌘</kbd><kbd>K</kbd> from anywhere to jump.
+            <span class="font-mono text-xs text-ink-mute inline-flex items-center gap-[6px]">
+              <kbd class="font-mono text-[10px] py-[1px] px-[5px] border border-border rounded-[3px] text-ink-mute bg-bg-elev">⌘</kbd>
+              <kbd class="font-mono text-[10px] py-[1px] px-[5px] border border-border rounded-[3px] text-ink-mute bg-bg-elev">K</kbd>
+              from anywhere to jump.
             </span>
           </div>
-          <ul class="hero__chips rise" style="--d: 900ms" role="list">
+          <ul class="rise inline-flex flex-wrap gap-2 p-0 m-0 mt-2 list-none" style="--d: 900ms" role="list">
             <li class="chip">
-              <span class="dot" style="background: var(--up)"></span>
+              <span class="dot bg-up"></span>
               60 fps target
             </li>
             <li class="chip">
-              <span class="dot" style="background: var(--accent); box-shadow: 0 0 6px var(--accent)"></span>
+              <span class="dot bg-accent shadow-[0_0_6px_var(--accent)]"></span>
               0 third-party state libs
             </li>
             <li class="chip">
-              <span class="dot" style="background: var(--info)"></span>
+              <span class="dot bg-info"></span>
               Vue 3 · ECharts
             </li>
           </ul>
         </div>
-        <div class="hero__preview rise" style="--d: 520ms">
+        <div class="rise relative z-[1] max-w-[640px] justify-self-end w-full" style="--d: 520ms">
           <HeroPreview />
-          <div class="hero__scan" aria-hidden="true"></div>
+          <div class="hero-scan absolute -inset-[2px] pointer-events-none rounded-1 mix-blend-screen opacity-40" aria-hidden="true"></div>
         </div>
       </section>
 
-      <section v-reveal class="manifesto">
-        <p class="manifesto__quote">
+      <section
+        v-reveal
+        class="manifesto relative py-[clamp(60px,9vw,120px)] px-[clamp(20px,6vw,80px)] border-t border-b border-rule bg-bg-elev"
+      >
+        <p class="m-0 mx-auto max-w-[24ch] font-tech font-medium text-[clamp(34px,4.8vw,64px)] leading-[1.1] tracking-[-0.03em] text-ink text-center">
           <span>“Built for the trader who wants </span>
-          <em>signal over noise</em>
+          <em class="not-italic text-accent font-bold">signal over noise</em>
           <span>, at sixty frames a second.”</span>
         </p>
-        <p class="manifesto__sig mono">— TAPE · v0.1 · synthetic feed</p>
+        <p class="mt-[22px] mx-auto text-center uppercase tracking-[0.08em] text-[11px] text-ink-mute font-mono">
+          — TAPE · v0.1 · synthetic feed
+        </p>
       </section>
 
-      <section id="pillars" v-reveal class="pillars">
-        <header class="section__head">
+      <section id="pillars" v-reveal class="lp-anchor">
+        <header class="section-head flex flex-col gap-2 pt-[clamp(48px,7vw,96px)] px-[clamp(20px,4vw,56px)] pb-[clamp(20px,3vw,36px)]">
           <span class="eyebrow">Why TAPE</span>
-          <h2 class="section__title display">Three rules. No exceptions.</h2>
+          <h2 class="section-title m-0 font-tech font-bold text-[clamp(34px,4.6vw,62px)] tracking-[-0.035em] leading-none text-ink lowercase">
+            Three rules. No exceptions.
+          </h2>
         </header>
-        <ol class="pillars__list" role="list">
-          <li v-for="p in PILLARS" :key="p.n" class="pillar">
-            <span class="pillar__n mono">{{ p.n }}</span>
-            <h3 class="pillar__t display">{{ p.title }}</h3>
-            <p class="pillar__b">{{ p.body }}</p>
-            <span class="pillar__line" aria-hidden="true"></span>
+        <ol class="pillars-list list-none m-0 px-[clamp(20px,4vw,56px)] pb-[clamp(48px,7vw,96px)] grid grid-cols-3 gap-[clamp(20px,2vw,32px)]" role="list">
+          <li
+            v-for="p in PILLARS"
+            :key="p.n"
+            class="pillar relative flex flex-col gap-3 px-[22px] py-7 border border-border bg-surface overflow-hidden transition-[border-color,transform] hover:border-accent hover:-translate-y-[2px]"
+          >
+            <span class="font-mono text-[11px] tracking-[0.18em] text-ink-faint">{{ p.n }}</span>
+            <h3 class="m-0 font-tech font-bold text-[clamp(24px,2.6vw,34px)] tracking-[-0.025em] text-ink lowercase">{{ p.title }}</h3>
+            <p class="m-0 text-ink-dim text-md leading-[1.5]">{{ p.body }}</p>
+            <span class="pillar-line absolute left-0 right-0 bottom-0 h-px bg-accent shadow-[0_0_8px_var(--accent)]" aria-hidden="true"></span>
           </li>
         </ol>
       </section>
 
-      <section id="capabilities" v-reveal class="caps">
-        <header class="section__head">
+      <section id="capabilities" v-reveal class="lp-anchor bg-bg border-t border-b border-rule">
+        <header class="section-head flex flex-col gap-2 pt-[clamp(48px,7vw,96px)] px-[clamp(20px,4vw,56px)] pb-[clamp(20px,3vw,36px)]">
           <span class="eyebrow">In the terminal</span>
-          <h2 class="section__title display">Everything you need on one screen.</h2>
+          <h2 class="m-0 font-tech font-bold text-[clamp(34px,4.6vw,62px)] tracking-[-0.035em] leading-none text-ink lowercase">
+            Everything you need on one screen.
+          </h2>
         </header>
-        <ul class="caps__grid" role="list">
-          <li v-for="c in CAPABILITIES" :key="c.title" class="cap">
-            <span class="cap__eyebrow mono">{{ c.eyebrow }}</span>
-            <h3 class="cap__t">{{ c.title }}</h3>
-            <p class="cap__d">{{ c.desc }}</p>
+        <ul class="caps-grid list-none m-0 px-[clamp(20px,4vw,56px)] pb-[clamp(48px,7vw,96px)] grid grid-cols-3 border-l border-rule" role="list">
+          <li
+            v-for="(c, i) in CAPABILITIES"
+            :key="c.title"
+            class="cap flex flex-col gap-2 px-6 pt-7 pb-8 border-r border-b border-rule transition-colors hover:bg-accent-wash"
+            :class="i < 3 ? 'border-t border-rule' : ''"
+          >
+            <span class="font-mono text-[10px] tracking-[0.18em] text-ink-faint">{{ c.eyebrow }}</span>
+            <h3 class="m-0 text-xl font-tech font-semibold tracking-[-0.02em] text-ink lowercase">{{ c.title }}</h3>
+            <p class="m-0 text-ink-dim text-sm leading-[1.55]">{{ c.desc }}</p>
           </li>
         </ul>
       </section>
 
-      <section id="numbers" ref="statsEl" class="stats">
-        <div class="stats__row">
-          <div class="stat">
+      <section id="numbers" ref="statsEl" class="lp-anchor py-[clamp(56px,8vw,96px)] px-[clamp(20px,4vw,56px)]">
+        <div class="stats-row grid grid-cols-4 border border-border rounded-1 overflow-hidden bg-surface">
+          <div class="stat flex flex-col gap-[6px] px-6 py-7 border-r border-rule last:border-r-0">
             <span class="eyebrow">Frame budget</span>
-            <span class="stat__v mono">
+            <span class="font-tech text-[clamp(40px,4.4vw,56px)] font-bold tracking-[-0.04em] text-ink inline-flex items-baseline gap-[6px] tabular-nums">
               <AnimatedNumber
                 v-if="statsVisible"
                 :value="60"
@@ -200,13 +223,13 @@ const PILLARS = [
                 :format="(n) => Math.round(n).toString()"
               />
               <span v-else>0</span>
-              <span class="stat__u">fps</span>
+              <span class="text-[0.4em] text-ink-mute font-normal">fps</span>
             </span>
-            <span class="stat__d">target render rate</span>
+            <span class="text-[11px] tracking-[0.08em] uppercase text-ink-mute">target render rate</span>
           </div>
-          <div class="stat">
+          <div class="stat flex flex-col gap-[6px] px-6 py-7 border-r border-rule">
             <span class="eyebrow">Decode</span>
-            <span class="stat__v mono">
+            <span class="font-tech text-[clamp(40px,4.4vw,56px)] font-bold tracking-[-0.04em] text-ink inline-flex items-baseline gap-[6px] tabular-nums">
               &lt;<AnimatedNumber
                 v-if="statsVisible"
                 :value="1"
@@ -214,13 +237,13 @@ const PILLARS = [
                 :format="(n) => n.toFixed(1)"
               />
               <span v-else>0.0</span>
-              <span class="stat__u">ms</span>
+              <span class="text-[0.4em] text-ink-mute font-normal">ms</span>
             </span>
-            <span class="stat__d">per WS payload</span>
+            <span class="text-[11px] tracking-[0.08em] uppercase text-ink-mute">per WS payload</span>
           </div>
-          <div class="stat">
+          <div class="stat flex flex-col gap-[6px] px-6 py-7 border-r border-rule">
             <span class="eyebrow">Symbols</span>
-            <span class="stat__v mono">
+            <span class="font-tech text-[clamp(40px,4.4vw,56px)] font-bold tracking-[-0.04em] text-ink inline-flex items-baseline gap-[6px] tabular-nums">
               <AnimatedNumber
                 v-if="statsVisible"
                 :value="24"
@@ -229,11 +252,11 @@ const PILLARS = [
               />
               <span v-else>0</span>
             </span>
-            <span class="stat__d">streamed concurrently</span>
+            <span class="text-[11px] tracking-[0.08em] uppercase text-ink-mute">streamed concurrently</span>
           </div>
-          <div class="stat">
+          <div class="stat flex flex-col gap-[6px] px-6 py-7">
             <span class="eyebrow">Deps</span>
-            <span class="stat__v mono">
+            <span class="font-tech text-[clamp(40px,4.4vw,56px)] font-bold tracking-[-0.04em] text-ink inline-flex items-baseline gap-[6px] tabular-nums">
               <AnimatedNumber
                 v-if="statsVisible"
                 :value="0"
@@ -241,29 +264,31 @@ const PILLARS = [
                 :format="(n) => Math.round(n).toString()"
               />
             </span>
-            <span class="stat__d">third-party state libs</span>
+            <span class="text-[11px] tracking-[0.08em] uppercase text-ink-mute">third-party state libs</span>
           </div>
         </div>
       </section>
 
-      <section v-reveal class="close">
-        <div class="close__scan" aria-hidden="true"></div>
-        <h2 class="close__title display">
-          Open the <em>tape</em>.
+      <section v-reveal class="close relative py-[clamp(80px,11vw,160px)] px-[clamp(20px,4vw,56px)] text-center border-t border-rule overflow-hidden bg-bg">
+        <div class="close-scan absolute inset-0 pointer-events-none mix-blend-overlay" aria-hidden="true"></div>
+        <h2 class="m-0 mx-auto font-tech font-extrabold text-[clamp(52px,9.5vw,136px)] tracking-[-0.05em] text-ink leading-[0.94] lowercase">
+          Open the <em class="not-italic text-accent">tape</em>.
         </h2>
-        <p class="close__sub">No sign-up. No friction. The terminal is already running.</p>
-        <RouterLink to="/dashboard" class="lp__cta lp__cta--lg">
+        <p class="mt-[18px] mx-auto mb-8 max-w-[42ch] text-ink-dim text-lg">
+          No sign-up. No friction. The terminal is already running.
+        </p>
+        <RouterLink to="/dashboard" class="lp-cta lp-cta-lg">
           Enter terminal
-          <span aria-hidden="true" class="lp__cta-arrow">→</span>
+          <span aria-hidden="true" class="lp-arrow font-mono">→</span>
         </RouterLink>
       </section>
     </main>
 
-    <footer class="lp__foot">
-      <div class="lp__foot-l">
+    <footer class="lp-foot flex items-center justify-between gap-4 py-[22px] px-[clamp(20px,4vw,56px)] border-t border-rule bg-bg flex-wrap">
+      <div>
         <Brand subtle />
       </div>
-      <div class="lp__foot-r tech">
+      <div class="lp-foot-tech font-tech text-xs tracking-[0.06em] text-ink-mute">
         © Moluno {{ year }}
       </div>
     </footer>
@@ -271,58 +296,14 @@ const PILLARS = [
 </template>
 
 <style scoped>
-.lp {
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg);
-  position: relative;
-  font-family: var(--font-body);
+.lp-anchor {
+  scroll-margin-top: 72px;
 }
-.tech {
-  font-family: var(--font-tech);
-  font-feature-settings:
-    'ss01' on,
-    'ss02' on,
-    'zero' on;
-  letter-spacing: -0.005em;
+.section-head {
+  scroll-margin-top: 84px;
 }
 
-.lp__bar {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s-5);
-  padding: 12px var(--s-6);
-  background: color-mix(in srgb, var(--bg) 80%, transparent);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--rule);
-}
-.lp__nav {
-  display: inline-flex;
-  gap: 2px;
-}
-.lp__nav-item {
-  padding: 6px 10px;
-  font-size: var(--fs-xs);
-  letter-spacing: var(--tracking-mid);
-  text-transform: uppercase;
-  color: var(--ink-mute);
-  transition: color var(--t-fast) var(--ease-out);
-}
-.lp__nav-item:hover {
-  color: var(--ink);
-}
-.lp__bar-r {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.lp__cta {
+.lp-cta {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -340,144 +321,60 @@ const PILLARS = [
   isolation: isolate;
   transition: filter var(--t-fast) var(--ease-out);
 }
-.lp__cta::before {
+.lp-cta::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
-  background:
-    radial-gradient(40% 80% at 0% 50%, rgba(255, 255, 255, 0.18), transparent 80%);
+  background: radial-gradient(
+    40% 80% at 0% 50%,
+    rgba(255, 255, 255, 0.18),
+    transparent 80%
+  );
   transform: translateX(-30%);
   transition: transform 360ms var(--ease-out);
 }
-.lp__cta:hover {
+.lp-cta:hover {
   filter: brightness(1.06);
 }
-.lp__cta:hover::before {
+.lp-cta:hover::before {
   transform: translateX(120%);
 }
-.lp__cta:hover .lp__cta-arrow {
+.lp-cta:hover .lp-arrow {
   transform: translateX(3px);
 }
-.lp__cta-arrow {
-  font-family: var(--font-mono);
+.lp-arrow {
   transition: transform 240ms var(--ease-out);
 }
-.lp__cta--sm {
+.lp-cta-sm {
   height: 30px;
   padding: 0 12px;
 }
-.lp__cta--lg {
+.lp-cta-lg {
   height: 56px;
   padding: 0 28px;
   font-size: var(--fs-sm);
 }
 
-.lp__main {
-  flex: 1;
-}
-
-.hero {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-  align-items: center;
-  gap: clamp(28px, 4vw, 56px);
-  padding: clamp(36px, 8vw, 96px) clamp(20px, 4vw, 56px) clamp(48px, 9vw, 120px);
-  overflow: hidden;
-}
-.hero__grid {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.55;
+.hero-grid {
   background-image:
     linear-gradient(var(--grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 64px 64px, 64px 64px;
-  background-position: 0 0, 0 0;
+  background-size:
+    64px 64px,
+    64px 64px;
   mask-image: radial-gradient(70% 70% at 30% 35%, #000 30%, transparent 80%);
   animation: grid-drift 26s linear infinite;
 }
 @keyframes grid-drift {
   to {
-    background-position: 64px 64px, 64px 64px;
+    background-position:
+      64px 64px,
+      64px 64px;
   }
 }
-.hero__mark {
-  position: absolute;
-  bottom: -2vw;
-  right: -3vw;
-  font-family: var(--font-glyph);
-  font-size: clamp(200px, 24vw, 480px);
-  line-height: 0.78;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-  opacity: 0.025;
-  pointer-events: none;
-  user-select: none;
-  text-transform: lowercase;
-}
 
-.hero__copy {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  max-width: 640px;
-}
-
-.hero__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: var(--fs-xs);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--ink-mute);
-  align-self: flex-start;
-  padding: 6px 10px 6px 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-pill);
-  background: var(--surface);
-}
-.hero__eyebrow-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 6px var(--accent);
-  animation: pulse-dot 1.6s ease-in-out infinite;
-}
-
-.hero__title {
-  margin: 0;
-  font-family: var(--font-tech);
-  font-weight: 800;
-  font-size: clamp(52px, 9vw, 124px);
-  line-height: 0.92;
-  letter-spacing: -0.045em;
-  color: var(--ink);
-  display: inline-flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0 18px;
-  text-transform: lowercase;
-  font-feature-settings:
-    'ss01' on,
-    'ss02' on,
-    'zero' on;
-}
-.hero__live {
-  color: var(--accent);
-  position: relative;
-  display: inline-block;
-  font-style: normal;
-}
-.hero__live::after {
+.hero-live::after {
   content: '';
   position: absolute;
   left: 4%;
@@ -487,70 +384,22 @@ const PILLARS = [
   background: var(--accent);
   opacity: 0.65;
 }
-.hero__period {
-  color: var(--accent);
-}
 
-.hero__sub {
-  margin: 0;
-  color: var(--ink-dim);
-  font-size: clamp(15px, 1.4vw, 18px);
-  line-height: 1.55;
-  max-width: 56ch;
-}
-
-.hero__cta-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 8px;
-  flex-wrap: wrap;
-}
-.hero__hint {
-  font-family: var(--font-mono);
-  font-size: var(--fs-xs);
-  color: var(--ink-mute);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.hero__hint kbd {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  padding: 1px 5px;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  color: var(--ink-mute);
-  background: var(--bg-elev);
-}
-
-.hero__chips {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 0;
-  margin: 8px 0 0;
-  list-style: none;
-}
-
-.hero__preview {
-  position: relative;
-  z-index: 1;
-  max-width: 640px;
-  justify-self: end;
-  width: 100%;
-}
-.hero__scan {
-  position: absolute;
-  inset: -2px;
-  pointer-events: none;
-  border-radius: var(--r-1);
-  background:
-    linear-gradient(180deg, transparent 0%, var(--accent-wash) 50%, transparent 100%);
-  mix-blend-mode: screen;
-  opacity: 0.4;
-  animation: scan 7s linear infinite;
-  mask-image: linear-gradient(180deg, transparent 0, #000 4%, #000 96%, transparent 100%);
+.hero-scan {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--accent-soft) 50%,
+    transparent 100%
+  );
+  animation: scan 5.6s linear infinite;
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0,
+    #000 4%,
+    #000 96%,
+    transparent 100%
+  );
 }
 @keyframes scan {
   0% {
@@ -574,13 +423,6 @@ const PILLARS = [
   }
 }
 
-.manifesto {
-  position: relative;
-  padding: clamp(60px, 9vw, 120px) clamp(20px, 6vw, 80px);
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
-  background: var(--bg-elev);
-}
 .manifesto::before {
   content: '';
   position: absolute;
@@ -592,214 +434,15 @@ const PILLARS = [
   background: var(--accent);
   opacity: 0.45;
 }
-.manifesto__quote {
-  margin: 0 auto;
-  max-width: 24ch;
-  font-family: var(--font-tech);
-  font-weight: 500;
-  font-size: clamp(34px, 4.8vw, 64px);
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-  color: var(--ink);
-  text-align: center;
-}
-.manifesto__quote em {
-  font-style: normal;
-  color: var(--accent);
-  font-weight: 700;
-}
-.manifesto__sig {
-  margin: 22px auto 0;
-  text-align: center;
-  letter-spacing: var(--tracking-mid);
-  text-transform: uppercase;
-  font-size: 11px;
-  color: var(--ink-mute);
-}
 
-.section__head {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: clamp(48px, 7vw, 96px) clamp(20px, 4vw, 56px) clamp(20px, 3vw, 36px);
-  scroll-margin-top: 84px;
-}
-.pillars,
-.caps,
-.stats {
-  scroll-margin-top: 72px;
-}
-.section__title {
-  margin: 0;
-  font-family: var(--font-tech);
-  font-weight: 700;
-  font-size: clamp(34px, 4.6vw, 62px);
-  letter-spacing: -0.035em;
-  line-height: 1;
-  color: var(--ink);
-  text-transform: lowercase;
-}
-
-.pillars__list {
-  list-style: none;
-  margin: 0;
-  padding: 0 clamp(20px, 4vw, 56px) clamp(48px, 7vw, 96px);
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(20px, 2vw, 32px);
-}
-.pillar {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 28px 22px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  overflow: hidden;
-  transition: border-color var(--t-mid) var(--ease-out), transform var(--t-mid) var(--ease-out);
-}
-.pillar:hover {
-  border-color: var(--accent);
-  transform: translateY(-2px);
-}
-.pillar:hover .pillar__line {
-  transform: translateX(0);
-}
-.pillar__n {
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  color: var(--ink-faint);
-}
-.pillar__t {
-  margin: 0;
-  font-family: var(--font-tech);
-  font-weight: 700;
-  font-size: clamp(24px, 2.6vw, 34px);
-  letter-spacing: -0.025em;
-  color: var(--ink);
-  text-transform: lowercase;
-}
-.pillar__b {
-  margin: 0;
-  color: var(--ink-dim);
-  font-size: var(--fs-md);
-  line-height: 1.5;
-}
-.pillar__line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
+.pillar-line {
   transform: translateX(-101%);
   transition: transform 420ms var(--ease-out);
 }
-
-.caps {
-  background: var(--bg);
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
-}
-.caps__grid {
-  list-style: none;
-  margin: 0;
-  padding: 0 clamp(20px, 4vw, 56px) clamp(48px, 7vw, 96px);
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-left: 1px solid var(--rule);
-}
-.cap {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 28px 24px 32px;
-  border-right: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
-  background: transparent;
-  transition: background var(--t-mid) var(--ease-out);
-}
-.cap:hover {
-  background: var(--accent-wash);
-}
-.cap:nth-child(-n + 3) {
-  border-top: 1px solid var(--rule);
-}
-.cap__eyebrow {
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  color: var(--ink-faint);
-}
-.cap__t {
-  margin: 0;
-  font-size: 20px;
-  font-family: var(--font-tech);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-  text-transform: lowercase;
-}
-.cap__d {
-  margin: 0;
-  color: var(--ink-dim);
-  font-size: var(--fs-sm);
-  line-height: 1.55;
+.pillar:hover .pillar-line {
+  transform: translateX(0);
 }
 
-.stats {
-  padding: clamp(56px, 8vw, 96px) clamp(20px, 4vw, 56px);
-}
-.stats__row {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  border: 1px solid var(--border);
-  border-radius: var(--r-1);
-  overflow: hidden;
-  background: var(--surface);
-}
-.stat {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 28px 24px;
-  border-right: 1px solid var(--rule);
-}
-.stat:last-child {
-  border-right: 0;
-}
-.stat__v {
-  font-family: var(--font-tech);
-  font-size: clamp(40px, 4.4vw, 56px);
-  font-weight: 700;
-  color: var(--ink);
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  letter-spacing: -0.04em;
-  font-variant-numeric: tabular-nums;
-}
-.stat__u {
-  font-size: 0.4em;
-  color: var(--ink-mute);
-  font-weight: 400;
-}
-.stat__d {
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-mute);
-}
-
-.close {
-  position: relative;
-  padding: clamp(80px, 11vw, 160px) clamp(20px, 4vw, 56px);
-  text-align: center;
-  border-top: 1px solid var(--rule);
-  overflow: hidden;
-  background: var(--bg);
-}
 .close::before {
   content: '';
   position: absolute;
@@ -811,100 +454,50 @@ const PILLARS = [
   background: var(--accent);
   opacity: 0.5;
 }
-.close__scan {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(
-      180deg,
-      transparent 0,
-      transparent 3px,
-      rgba(236, 231, 223, 0.012) 3px,
-      rgba(236, 231, 223, 0.012) 4px
-    );
-  mix-blend-mode: overlay;
-}
-.close__title {
-  margin: 0 auto;
-  font-family: var(--font-tech);
-  font-weight: 800;
-  font-size: clamp(52px, 9.5vw, 136px);
-  letter-spacing: -0.05em;
-  color: var(--ink);
-  line-height: 0.94;
-  text-transform: lowercase;
-}
-.close__title em {
-  font-style: normal;
-  color: var(--accent);
-}
-.close__sub {
-  margin: 18px auto 32px;
-  max-width: 42ch;
-  color: var(--ink-dim);
-  font-size: var(--fs-lg);
-}
-
-.lp__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s-4);
-  padding: 22px clamp(20px, 4vw, 56px);
-  border-top: 1px solid var(--rule);
-  background: var(--bg);
-  flex-wrap: wrap;
-}
-.lp__foot-r {
-  font-size: var(--fs-xs);
-  letter-spacing: 0.06em;
-  color: var(--ink-mute);
+.close-scan {
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0,
+    transparent 3px,
+    rgba(236, 231, 223, 0.012) 3px,
+    rgba(236, 231, 223, 0.012) 4px
+  );
 }
 
 @media (max-width: 1080px) {
   .hero {
     grid-template-columns: 1fr;
   }
-  .hero__preview {
+  .hero > .rise:last-child {
     justify-self: stretch;
   }
 }
 
 @media (max-width: 880px) {
-  .lp__nav {
+  .lp-nav {
     display: none;
   }
-  .pillars__list,
-  .caps__grid {
+  .pillars-list,
+  .caps-grid {
     grid-template-columns: 1fr;
   }
-  .caps__grid {
+  .caps-grid {
     border-left: 0;
   }
   .cap {
     border-right: 0;
   }
-  .stats__row {
+  .stats-row {
     grid-template-columns: repeat(2, 1fr);
-  }
-  .stat:nth-child(2) {
-    border-right: 0;
-  }
-  .stat:nth-child(-n + 2) {
-    border-bottom: 1px solid var(--rule);
   }
 }
 
 @media (max-width: 480px) {
-  .hero__chips {
-    width: 100%;
-  }
-  .lp__foot {
+  .lp-foot {
     justify-content: center;
     text-align: center;
   }
-  .lp__foot-r {
+  .lp-foot > div {
     width: 100%;
     justify-content: center;
   }
