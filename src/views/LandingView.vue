@@ -622,6 +622,12 @@ const PILLARS = [
   flex-direction: column;
   gap: 8px;
   padding: clamp(48px, 7vw, 96px) clamp(20px, 4vw, 56px) clamp(20px, 3vw, 36px);
+  scroll-margin-top: 84px;
+}
+.pillars,
+.caps,
+.stats {
+  scroll-margin-top: 72px;
 }
 .section__title {
   margin: 0;

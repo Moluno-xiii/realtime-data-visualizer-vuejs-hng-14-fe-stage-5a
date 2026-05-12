@@ -3,11 +3,11 @@ import { ref, watch } from 'vue'
 export type DataSourceMode = 'synthetic' | 'live'
 
 const KEY = 'tape:source'
-const mode = ref<DataSourceMode>('synthetic')
+const mode = ref<DataSourceMode>('live')
 
 if (typeof localStorage !== 'undefined') {
   const saved = localStorage.getItem(KEY) as DataSourceMode | null
-  if (saved === 'synthetic') mode.value = 'synthetic'
+  if (saved === 'live' || saved === 'synthetic') mode.value = saved
 }
 
 watch(mode, (m) => {
@@ -15,7 +15,7 @@ watch(mode, (m) => {
 })
 
 export function useDataSource() {
-  const liveEnabled = false
+  const liveEnabled = true
   function set(m: DataSourceMode) {
     if (m === 'live' && !liveEnabled) return
     mode.value = m

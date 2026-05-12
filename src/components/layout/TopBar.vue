@@ -1,19 +1,32 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { onBeforeUnmount, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import Brand from './Brand.vue'
 import StatusPill from '@/components/controls/StatusPill.vue'
 import ThemeToggle from '@/components/controls/ThemeToggle.vue'
 import { useMobileDrawer } from '@/composables/useMobileDrawer'
 import { useOverlays } from '@/composables/useOverlays'
-import { useHeartbeat } from '@/composables/useHeartbeat'
 import { usePause } from '@/composables/usePause'
+import { useFocusedSymbol } from '@/composables/useFocusedSymbol'
+import { useStreamStore } from '@/stores/streamStore'
 
 const route = useRoute()
 const { toggle: toggleDrawer } = useMobileDrawer()
 const { openCommandPalette, toggleCommandPalette } = useOverlays()
-const { latencyMs } = useHeartbeat()
 const { paused, toggle: togglePause } = usePause()
+const { focus } = useFocusedSymbol()
+const stream = useStreamStore()
+const { state: streamState, latencyMs: rawLatency } = storeToRefs(stream)
+
+const pillState = computed<'live' | 'paused' | 'reconnecting' | 'offline'>(() => {
+  if (paused.value) return 'paused'
+  if (streamState.value === 'live') return 'live'
+  if (streamState.value === 'reconnecting' || streamState.value === 'connecting')
+    return 'reconnecting'
+  return 'offline'
+})
+const latency = computed(() => Math.max(1, Math.round(rawLatency.value || 32)))
 
 const isMac =
   typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform)
@@ -37,12 +50,12 @@ function onKeydown(e: KeyboardEvent) {
 onMounted(() => document.addEventListener('keydown', onKeydown))
 onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
 
-const NAV = [
+const NAV = computed(() => [
   { to: '/dashboard', label: 'Overview' },
-  { to: '/markets/BTCUSDT', label: 'Markets', match: '/markets' },
+  { to: `/markets/${focus.value}`, label: 'Markets', match: '/markets' },
   { to: '/activity', label: 'Activity' },
   { to: '/settings', label: 'Settings' },
-]
+])
 
 function isActive(item: { to: string; match?: string }) {
   if (item.match) return route.path.startsWith(item.match)
@@ -116,10 +129,7 @@ function isActive(item: { to: string; match?: string }) {
             <path d="m11 11 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
           </svg>
         </button>
-        <StatusPill
-          :state="paused ? 'paused' : 'live'"
-          :latency-ms="Math.max(1, Math.round(16.67 + latencyMs))"
-        />
+        <StatusPill :state="pillState" :latency-ms="latency" />
         <ThemeToggle />
         <RouterLink to="/settings" class="avatar" aria-label="Open settings">
           <span class="avatar__txt">TA</span>

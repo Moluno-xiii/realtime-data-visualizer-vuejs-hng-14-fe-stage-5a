@@ -1,38 +1,48 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import Modal from './Modal.vue'
-import { FIXTURE_TICKERS, SYMBOLS } from '@/mocks/fixtures'
 import { useWatchlist } from '@/composables/useWatchlist'
+import { useSymbolsStore } from '@/stores/symbolsStore'
+import { useMarketStore } from '@/stores/marketStore'
 import { formatPct, formatPrice } from '@/utils/format'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ (e: 'close'): void }>()
 
-const { has, toggle, symbols, reset } = useWatchlist()
+const { toggle, symbols, reset } = useWatchlist()
+const symbolsStore = useSymbolsStore()
+const { directory, loaded } = storeToRefs(symbolsStore)
+const market = useMarketStore()
+const { tickers } = storeToRefs(market)
 const q = ref('')
 
 watch(
   () => props.open,
   (v) => {
-    if (v) q.value = ''
+    if (v) {
+      q.value = ''
+      symbolsStore.ensureLoaded()
+    }
   },
 )
 
-const tickerBy = new Map(FIXTURE_TICKERS.map((t) => [t.symbol, t]))
-
 const rows = computed(() => {
   const term = q.value.trim().toLowerCase()
-  return SYMBOLS.filter((s) => {
-    if (!term) return true
-    return (
-      s.symbol.toLowerCase().includes(term) ||
-      s.base.toLowerCase().includes(term) ||
-      s.name.toLowerCase().includes(term)
-    )
-  }).map((s) => ({
-    info: s,
-    on: has(s.symbol),
-    ticker: tickerBy.get(s.symbol),
+  const filtered = !term
+    ? directory.value.slice(0, 80)
+    : directory.value.filter(
+        (s) =>
+          s.symbol.toLowerCase().includes(term) ||
+          s.base.toLowerCase().includes(term) ||
+          s.name.toLowerCase().includes(term),
+      )
+  const watchSet = new Set(symbols.value)
+  const live = tickers.value
+  return filtered.slice(0, 200).map((info) => ({
+    info,
+    on: watchSet.has(info.symbol),
+    ticker: live[info.symbol],
   }))
 })
 </script>
@@ -44,7 +54,8 @@ const rows = computed(() => {
         <span class="eyebrow">Watchlist</span>
         <h2 class="head__title">Manage symbols</h2>
         <p class="head__sub mono">
-          {{ symbols.length }} of {{ SYMBOLS.length }} selected
+          {{ symbols.length }} of {{ directory.length }} selected
+          <span v-if="!loaded" class="head__loading">· loading directory…</span>
         </p>
       </div>
       <button type="button" class="head__reset" @click="reset">Reset</button>
@@ -125,6 +136,10 @@ const rows = computed(() => {
   margin: 4px 0 0;
   font-size: var(--fs-xs);
   color: var(--ink-mute);
+}
+.head__loading {
+  color: var(--warn);
+  margin-left: 4px;
 }
 .head__reset {
   font-size: var(--fs-xs);

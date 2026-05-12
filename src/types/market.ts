@@ -53,6 +53,16 @@ export interface ActivityEvent {
   value?: number
 }
 
-export type TimeRange = '1m' | '5m' | '15m' | '1h' | '4h' | 'live'
+export type TimeRange =
+  | 'live'
+  | '1m'
+  | '5m'
+  | '15m'
+  | '1h'
+  | '4h'
+  | '1mo'
+  | '3mo'
+  | '6mo'
+  | '1y'
 
 export type ChartKind = 'line' | 'area' | 'bar' | 'candle'

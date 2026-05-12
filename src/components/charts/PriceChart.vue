@@ -9,6 +9,7 @@ import {
   chartPalette,
 } from '@/charts/echartsBootstrap'
 import type { PricePoint, ChartKind } from '@/types/market'
+import ChartLoading from './ChartLoading.vue'
 
 bootstrapECharts()
 
@@ -41,6 +42,8 @@ const option = computed(() => {
     grid: baseGrid({ left: 56, right: 16, top: 18, bottom: props.showVolume ? 60 : 28 }),
     xAxis: {
       type: 'time',
+      min: data[0]?.[0],
+      max: data[data.length - 1]?.[0],
       ...baseAxisLine(),
     },
     yAxis: {
@@ -126,7 +129,8 @@ const option = computed(() => {
 </script>
 
 <template>
-  <div class="pc" :style="{ height: `${height}px` }">
+  <ChartLoading v-if="!series.length" :height="height" />
+  <div v-else class="pc" :style="{ height: `${height}px` }">
     <VChart :option="option" :autoresize="true" />
   </div>
 </template>

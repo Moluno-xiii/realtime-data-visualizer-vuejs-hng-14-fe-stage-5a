@@ -1,29 +1,31 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
-import { FIXTURE_TICKERS, SYMBOLS } from '@/mocks/fixtures'
 import { formatPrice, formatPct } from '@/utils/format'
 import { useWatchlist } from '@/composables/useWatchlist'
 import { useOverlays } from '@/composables/useOverlays'
-import { useHeartbeat } from '@/composables/useHeartbeat'
+import { useMarketStore } from '@/stores/marketStore'
+import { useStreamStore } from '@/stores/streamStore'
+import { useSymbolsStore } from '@/stores/symbolsStore'
+import EmptyState from '@/components/feedback/EmptyState.vue'
 
 const route = useRoute()
 const { symbols } = useWatchlist()
 const { openSymbolPicker } = useOverlays()
-const { msgsPerSec } = useHeartbeat()
+const market = useMarketStore()
+const { tickers } = storeToRefs(market)
+const stream = useStreamStore()
+const { msgsPerSec } = storeToRefs(stream)
+const symbolsStore = useSymbolsStore()
 
-const rows = computed(() => {
-  const bySym = new Map(SYMBOLS.map((s) => [s.symbol, s]))
-  const tickerBy = new Map(FIXTURE_TICKERS.map((t) => [t.symbol, t]))
-  return symbols.value
-    .map((sym) => {
-      const t = tickerBy.get(sym)
-      const info = bySym.get(sym)
-      if (!t || !info) return null
-      return { ...t, info }
-    })
-    .filter((r): r is NonNullable<typeof r> => r !== null)
-})
+const rows = computed(() =>
+  symbols.value.map((sym) => {
+    const info = symbolsStore.lookup(sym)
+    const ticker = tickers.value[sym]
+    return { symbol: sym, info, ticker }
+  }),
+)
 
 function isActive(symbol: string) {
   return route.path === `/markets/${symbol}`
@@ -43,7 +45,17 @@ function isActive(symbol: string) {
       >+</button>
     </div>
     <hr class="rule" />
-    <ul class="rail__list" role="list">
+    <div v-if="!rows.length" class="rail__empty">
+      <EmptyState
+        compact
+        eyebrow="Watchlist"
+        title="No symbols pinned"
+        body="Pin markets to track them here."
+        cta="Add symbols"
+        @action="openSymbolPicker"
+      />
+    </div>
+    <ul v-else class="rail__list" role="list">
       <li v-for="r in rows" :key="r.symbol">
         <RouterLink
           :to="`/markets/${r.symbol}`"
@@ -56,12 +68,13 @@ function isActive(symbol: string) {
             <span class="row__quote">/{{ r.info.quote }}</span>
           </span>
           <span class="row__values">
-            <span class="row__price mono">{{ formatPrice(r.price) }}</span>
+            <span class="row__price mono">
+              {{ r.ticker ? formatPrice(r.ticker.price) : '—' }}
+            </span>
             <span
               class="row__chg mono"
-              :class="r.changePct24h >= 0 ? 'up' : 'down'"
-              >{{ formatPct(r.changePct24h) }}</span
-            >
+              :class="r.ticker && r.ticker.changePct24h >= 0 ? 'up' : 'down'"
+            >{{ r.ticker ? formatPct(r.ticker.changePct24h) : '—' }}</span>
           </span>
         </RouterLink>
       </li>
@@ -70,7 +83,7 @@ function isActive(symbol: string) {
     <div class="rail__foot">
       <div class="rail__stat">
         <span class="eyebrow">Streams</span>
-        <span class="mono rail__stat-val">{{ rows.length }}/{{ SYMBOLS.length }}</span>
+        <span class="mono rail__stat-val">{{ rows.length }}</span>
       </div>
       <div class="rail__stat">
         <span class="eyebrow">Msgs/s</span>
@@ -118,6 +131,12 @@ function isActive(symbol: string) {
   overflow-y: auto;
   flex: 1;
   min-height: 0;
+}
+.rail__empty {
+  flex: 1;
+  min-height: 0;
+  padding: 14px;
+  overflow-y: auto;
 }
 
 .row {

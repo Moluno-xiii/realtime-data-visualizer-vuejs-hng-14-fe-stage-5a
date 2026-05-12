@@ -24,6 +24,7 @@ html {
   font-feature-settings:
     'ss01' on,
     'cv11' on;
+  scroll-behavior: smooth;
 }
 
 body {

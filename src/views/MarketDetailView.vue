@@ -1,34 +1,58 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import ChartCard from '@/components/cards/ChartCard.vue'
 import CandlestickChart from '@/components/charts/CandlestickChart.vue'
 import AnimatedNumber from '@/components/cards/AnimatedNumber.vue'
 import Sparkline from '@/components/cards/Sparkline.vue'
-import {
-  buildTrades,
-  FIXTURE_TICKERS,
-  generateCandles,
-  generateSeries,
-  SYMBOLS,
-} from '@/mocks/fixtures'
+import Skeleton from '@/components/feedback/Skeleton.vue'
 import { formatCompact, formatPct, formatPrice, formatTime } from '@/utils/format'
+import { useMarketStore } from '@/stores/marketStore'
+import { useKlineStore } from '@/stores/klineStore'
+import { useSymbolsStore } from '@/stores/symbolsStore'
+import { useFocusedSymbol } from '@/composables/useFocusedSymbol'
+import { useWatchlist } from '@/composables/useWatchlist'
 
 const route = useRoute()
-const symbol = computed(() => String(route.params.symbol ?? 'BTCUSDT'))
-const info = computed(
-  () => SYMBOLS.find((s) => s.symbol === symbol.value) ?? SYMBOLS[0]!,
+const market = useMarketStore()
+const klines = useKlineStore()
+const symbolsStore = useSymbolsStore()
+const { tickers, series, trades: tradesMap } = storeToRefs(market)
+const { setFocus } = useFocusedSymbol()
+const { has, add } = useWatchlist()
+
+const symbol = computed(() =>
+  String(route.params.symbol ?? 'BTCUSDT').toUpperCase(),
 )
-const ticker = computed(
-  () =>
-    FIXTURE_TICKERS.find((t) => t.symbol === symbol.value) ??
-    FIXTURE_TICKERS[0]!,
+
+watch(
+  symbol,
+  (s) => {
+    if (!s) return
+    setFocus(s)
+    if (!has(s)) add(s)
+  },
+  { immediate: true },
 )
-const candles = computed(() => generateCandles(symbol.value, 144, 15 * 60_000))
-const trades = computed(() => buildTrades(symbol.value, 40))
-const spark = computed(() =>
-  generateSeries(symbol.value, 60, 60_000).map((p) => p.v),
-)
+const info = computed(() => symbolsStore.lookup(symbol.value))
+const ticker = computed(() => tickers.value[symbol.value])
+const candles = computed(() => klines.get(symbol.value, '1m'))
+const trades = computed(() => tradesMap.value[symbol.value] ?? [])
+const spark = computed(() => {
+  const s = series.value[symbol.value] ?? []
+  return s.slice(-60).map((p) => p.v)
+})
+
+const statRows = computed(() => {
+  const t = ticker.value
+  return [
+    { label: '24h High', value: t ? '$' + formatPrice(t.high24h) : '—' },
+    { label: '24h Low', value: t ? '$' + formatPrice(t.low24h) : '—' },
+    { label: '24h Vol', value: t ? '$' + formatCompact(t.volume24h) : '—' },
+    { label: 'Last tick', value: t ? formatTime(t.lastUpdate) : '—' },
+  ]
+})
 </script>
 
 <template>
@@ -42,56 +66,52 @@ const spark = computed(() =>
           <span class="md__quote">/ {{ info.quote }}</span>
         </h1>
         <p class="md__sub">
-          {{ info.name }} · Spot · Binance-style synthetic feed
+          {{ info.name }} · Spot · Live feed
         </p>
       </div>
       <div class="md__price">
-        <div class="md__last">
-          <span class="md__currency">$</span>
-          <AnimatedNumber
-            :value="ticker.price"
-            :format="formatPrice"
-            class="md__lastnum"
-          />
-        </div>
-        <div class="md__delta">
-          <span :class="ticker.changePct24h >= 0 ? 'up' : 'down'" class="mono">
-            {{ formatPct(ticker.changePct24h) }}
-          </span>
-          <span class="md__delta-abs mono">
-            {{ ticker.change24h >= 0 ? '+' : '−' }}${{
-              Math.abs(ticker.change24h).toFixed(2)
-            }}
-          </span>
-          <span class="eyebrow">24h</span>
-        </div>
-        <Sparkline :points="spark" :width="240" :height="42" class="md__spark" />
+        <template v-if="ticker">
+          <div class="md__last">
+            <span class="md__currency">$</span>
+            <AnimatedNumber
+              :value="ticker.price"
+              :format="formatPrice"
+              class="md__lastnum"
+            />
+          </div>
+          <div class="md__delta">
+            <span :class="ticker.changePct24h >= 0 ? 'up' : 'down'" class="mono">
+              {{ formatPct(ticker.changePct24h) }}
+            </span>
+            <span class="md__delta-abs mono">
+              {{ ticker.change24h >= 0 ? '+' : '−' }}${{
+                Math.abs(ticker.change24h).toFixed(2)
+              }}
+            </span>
+            <span class="eyebrow">24h</span>
+          </div>
+          <Sparkline :points="spark" :width="240" :height="42" class="md__spark" />
+        </template>
+        <template v-else>
+          <Skeleton width="220" height="44" class="md__sk-last" />
+          <Skeleton width="160" height="14" />
+          <Skeleton block width="240" height="42" />
+        </template>
       </div>
     </header>
 
     <div class="md__stats">
-      <div class="stat">
-        <span class="eyebrow">24h High</span>
-        <span class="stat__val mono">${{ formatPrice(ticker.high24h) }}</span>
-      </div>
-      <div class="stat">
-        <span class="eyebrow">24h Low</span>
-        <span class="stat__val mono">${{ formatPrice(ticker.low24h) }}</span>
-      </div>
-      <div class="stat">
-        <span class="eyebrow">24h Vol</span>
-        <span class="stat__val mono">${{ formatCompact(ticker.volume24h) }}</span>
-      </div>
-      <div class="stat">
-        <span class="eyebrow">Last tick</span>
-        <span class="stat__val mono">{{ formatTime(ticker.lastUpdate) }}</span>
+      <div v-for="(stat, i) in statRows" :key="i" class="stat">
+        <span class="eyebrow">{{ stat.label }}</span>
+        <span v-if="ticker" class="stat__val mono">{{ stat.value }}</span>
+        <Skeleton v-else width="90" height="16" />
       </div>
     </div>
 
     <div class="md__grid">
       <ChartCard
         title="Candlestick"
-        eyebrow="15m interval · 36h window"
+        eyebrow="1m interval · live"
         class="md__chart"
       >
         <CandlestickChart :candles="candles" :height="420" />
@@ -103,7 +123,7 @@ const spark = computed(() =>
           <span class="mono muted-tone">{{ trades.length }} rows</span>
         </div>
         <hr class="rule" />
-        <ul class="trades" role="list">
+        <ul v-if="trades.length" class="trades" role="list">
           <li
             v-for="t in trades"
             :key="t.id"
@@ -116,6 +136,14 @@ const spark = computed(() =>
             </span>
             <span class="trade__size mono">{{ t.size.toFixed(4) }}</span>
             <span class="trade__side">{{ t.side }}</span>
+          </li>
+        </ul>
+        <ul v-else class="trades" role="list" aria-busy="true">
+          <li v-for="n in 14" :key="n" class="trade">
+            <Skeleton width="48" height="10" />
+            <Skeleton width="64" height="11" />
+            <Skeleton width="50" height="10" />
+            <Skeleton width="28" height="9" />
           </li>
         </ul>
       </section>
@@ -202,6 +230,12 @@ const spark = computed(() =>
 }
 .md__spark {
   margin-top: 6px;
+}
+.md__placeholder {
+  font-size: var(--fs-xs);
+  letter-spacing: var(--tracking-mid);
+  text-transform: uppercase;
+  color: var(--ink-faint);
 }
 
 .md__stats {

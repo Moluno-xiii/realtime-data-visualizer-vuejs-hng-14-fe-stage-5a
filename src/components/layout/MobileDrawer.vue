@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
-import { FIXTURE_TICKERS, SYMBOLS } from '@/mocks/fixtures'
 import { formatPct, formatPrice } from '@/utils/format'
 import { useMobileDrawer } from '@/composables/useMobileDrawer'
 import { useWatchlist } from '@/composables/useWatchlist'
 import { useOverlays } from '@/composables/useOverlays'
+import { useFocusedSymbol } from '@/composables/useFocusedSymbol'
+import { useMarketStore } from '@/stores/marketStore'
+import { useSymbolsStore } from '@/stores/symbolsStore'
+import EmptyState from '@/components/feedback/EmptyState.vue'
 import Brand from './Brand.vue'
 import ThemeToggle from '@/components/controls/ThemeToggle.vue'
 import StatusPill from '@/components/controls/StatusPill.vue'
@@ -13,32 +17,31 @@ import StatusPill from '@/components/controls/StatusPill.vue'
 const { open, hide } = useMobileDrawer()
 const { symbols } = useWatchlist()
 const { openSymbolPicker } = useOverlays()
+const { focus } = useFocusedSymbol()
+const market = useMarketStore()
+const { tickers } = storeToRefs(market)
+const symbolsStore = useSymbolsStore()
 const route = useRoute()
 
-const NAV = [
-  { to: '/', label: 'Overview' },
-  { to: '/markets/BTCUSDT', label: 'Markets', match: '/markets' },
+const NAV = computed(() => [
+  { to: '/dashboard', label: 'Overview' },
+  { to: `/markets/${focus.value}`, label: 'Markets', match: '/markets' },
   { to: '/activity', label: 'Activity' },
   { to: '/settings', label: 'Settings' },
-]
+])
 
 function isActive(item: { to: string; match?: string }) {
   if (item.match) return route.path.startsWith(item.match)
   return route.path === item.to
 }
 
-const watchlist = computed(() => {
-  const by = new Map(SYMBOLS.map((s) => [s.symbol, s]))
-  const tickerBy = new Map(FIXTURE_TICKERS.map((t) => [t.symbol, t]))
-  return symbols.value
-    .map((sym) => {
-      const t = tickerBy.get(sym)
-      const info = by.get(sym)
-      if (!t || !info) return null
-      return { ...t, info }
-    })
-    .filter((r): r is NonNullable<typeof r> => r !== null)
-})
+const watchlist = computed(() =>
+  symbols.value.map((sym) => ({
+    symbol: sym,
+    info: symbolsStore.lookup(sym),
+    ticker: tickers.value[sym],
+  })),
+)
 
 function manage() {
   hide()
@@ -124,7 +127,17 @@ onBeforeUnmount(() => {
           </button>
         </div>
         <hr class="rule" />
-        <ul class="drawer__list" role="list">
+        <div v-if="!watchlist.length" class="drawer__empty">
+          <EmptyState
+            compact
+            eyebrow="Watchlist"
+            title="No symbols pinned"
+            body="Pin markets to track them in real time."
+            cta="Add symbols"
+            @action="manage"
+          />
+        </div>
+        <ul v-else class="drawer__list" role="list">
           <li v-for="r in watchlist" :key="r.symbol">
             <RouterLink :to="`/markets/${r.symbol}`" class="wrow">
               <span class="wrow__sym">
@@ -133,11 +146,13 @@ onBeforeUnmount(() => {
                 <span class="wrow__quote">/{{ r.info.quote }}</span>
               </span>
               <span class="wrow__values">
-                <span class="wrow__price mono">{{ formatPrice(r.price) }}</span>
+                <span class="wrow__price mono">
+                  {{ r.ticker ? formatPrice(r.ticker.price) : '—' }}
+                </span>
                 <span
                   class="wrow__chg mono"
-                  :class="r.changePct24h >= 0 ? 'up' : 'down'"
-                >{{ formatPct(r.changePct24h) }}</span>
+                  :class="r.ticker && r.ticker.changePct24h >= 0 ? 'up' : 'down'"
+                >{{ r.ticker ? formatPct(r.ticker.changePct24h) : '—' }}</span>
               </span>
             </RouterLink>
           </li>
@@ -145,7 +160,7 @@ onBeforeUnmount(() => {
 
         <footer class="drawer__foot">
           <span class="eyebrow">TAPE //</span>
-          <span class="muted">v0.1 · synthetic feed</span>
+          <span class="muted">Binance live</span>
         </footer>
       </aside>
     </Transition>
@@ -265,6 +280,12 @@ onBeforeUnmount(() => {
   overflow-y: auto;
   flex: 1;
   min-height: 0;
+}
+.drawer__empty {
+  padding: 12px 16px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 .wrow {
   display: flex;

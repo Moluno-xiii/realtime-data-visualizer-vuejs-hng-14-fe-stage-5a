@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { FIXTURE_TICKERS, SYMBOLS } from '@/mocks/fixtures'
+import { storeToRefs } from 'pinia'
+import { SYMBOLS } from '@/mocks/fixtures'
 import { formatPrice, formatPct } from '@/utils/format'
+import { useMarketStore } from '@/stores/marketStore'
+
+const market = useMarketStore()
+const { tickers } = storeToRefs(market)
 
 const items = computed(() => {
   const bySym = new Map(SYMBOLS.map((s) => [s.symbol, s]))
-  const arr = FIXTURE_TICKERS.map((t) => ({
-    ...t,
-    info: bySym.get(t.symbol)!,
-  }))
-  return [...arr, ...arr]
+  const list = SYMBOLS.map((s) => {
+    const ticker = tickers.value[s.symbol]
+    if (!ticker) return null
+    return { ...ticker, info: bySym.get(s.symbol)! }
+  }).filter((r): r is NonNullable<typeof r> => r !== null)
+  return [...list, ...list]
 })
 </script>
 
