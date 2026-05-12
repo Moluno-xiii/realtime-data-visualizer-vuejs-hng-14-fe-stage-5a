@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import ChartCard from '@/components/cards/ChartCard.vue'
@@ -7,12 +7,14 @@ import CandlestickChart from '@/components/charts/CandlestickChart.vue'
 import AnimatedNumber from '@/components/cards/AnimatedNumber.vue'
 import Sparkline from '@/components/cards/Sparkline.vue'
 import Skeleton from '@/components/feedback/Skeleton.vue'
+import ConfirmModal from '@/components/overlays/ConfirmModal.vue'
 import { formatCompact, formatPct, formatPrice, formatTime } from '@/utils/format'
 import { useMarketStore } from '@/stores/marketStore'
 import { useKlineStore } from '@/stores/klineStore'
 import { useSymbolsStore } from '@/stores/symbolsStore'
 import { useFocusedSymbol } from '@/composables/useFocusedSymbol'
 import { useWatchlist } from '@/composables/useWatchlist'
+import { useOverlays } from '@/composables/useOverlays'
 
 const route = useRoute()
 const market = useMarketStore()
@@ -20,7 +22,23 @@ const klines = useKlineStore()
 const symbolsStore = useSymbolsStore()
 const { tickers, series, trades: tradesMap } = storeToRefs(market)
 const { setFocus } = useFocusedSymbol()
-const { has, add } = useWatchlist()
+const { has, add, remove } = useWatchlist()
+const { openMarketSwitcher } = useOverlays()
+
+const onWatchlist = computed(() => has(symbol.value))
+const confirmOpen = ref(false)
+
+function requestToggle() {
+  confirmOpen.value = true
+}
+function cancelToggle() {
+  confirmOpen.value = false
+}
+function confirmToggle() {
+  if (onWatchlist.value) remove(symbol.value)
+  else add(symbol.value)
+  confirmOpen.value = false
+}
 
 const symbol = computed(() =>
   String(route.params.symbol ?? 'BTCUSDT').toUpperCase(),
@@ -31,7 +49,6 @@ watch(
   (s) => {
     if (!s) return
     setFocus(s)
-    if (!has(s)) add(s)
   },
   { immediate: true },
 )
@@ -60,14 +77,50 @@ const statRows = computed(() => {
     <header class="md__head">
       <div class="md__title">
         <span class="eyebrow">Market</span>
-        <h1 class="display md__name">
-          <span class="md__icon">{{ info.icon }}</span>
-          {{ info.base }}
-          <span class="md__quote">/ {{ info.quote }}</span>
-        </h1>
+        <button
+          type="button"
+          class="md__switch"
+          aria-label="Switch market"
+          @click="openMarketSwitcher"
+        >
+          <h1 class="display md__name">
+            <span class="md__icon">{{ info.icon }}</span>
+            {{ info.base }}
+            <span class="md__quote">/ {{ info.quote }}</span>
+            <span class="md__caret" aria-hidden="true">
+              <svg viewBox="0 0 12 12" width="12" height="12">
+                <path
+                  d="M3 4l3 4 3-4"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+          </h1>
+        </button>
         <p class="md__sub">
           {{ info.name }} · Spot · Live feed
         </p>
+        <button
+          type="button"
+          class="md__watch"
+          :class="onWatchlist ? 'md__watch--on' : 'md__watch--off'"
+          :aria-pressed="onWatchlist"
+          @click="requestToggle"
+        >
+          <span class="md__watch-icon" aria-hidden="true">
+            <svg v-if="onWatchlist" viewBox="0 0 12 12" width="11" height="11">
+              <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+            <svg v-else viewBox="0 0 12 12" width="11" height="11">
+              <path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+          </span>
+          {{ onWatchlist ? 'Remove from watchlist' : 'Add to watchlist' }}
+        </button>
       </div>
       <div class="md__price">
         <template v-if="ticker">
@@ -148,6 +201,24 @@ const statRows = computed(() => {
         </ul>
       </section>
     </div>
+    <ConfirmModal
+      :open="confirmOpen"
+      :eyebrow="onWatchlist ? 'Remove' : 'Add'"
+      :title="
+        onWatchlist
+          ? `remove ${info.base} from watchlist?`
+          : `pin ${info.base} to watchlist?`
+      "
+      :body="
+        onWatchlist
+          ? `${info.name} will stop appearing in your watchlist, the activity feed, and the live ticker until you re-add it. Its market page stays accessible via search.`
+          : `${info.name} will be pinned to your watchlist and tracked in real time alongside your other markets.`
+      "
+      :confirm-label="onWatchlist ? 'Remove' : 'Add to watchlist'"
+      :variant="onWatchlist ? 'danger' : 'success'"
+      @confirm="confirmToggle"
+      @cancel="cancelToggle"
+    />
   </div>
 </template>
 
@@ -174,6 +245,41 @@ const statRows = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  align-items: flex-start;
+}
+.md__switch {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  border-radius: var(--r-1);
+  transition: opacity var(--t-fast) var(--ease-out);
+}
+.md__switch:hover .md__caret {
+  color: var(--accent);
+  transform: translateY(1px);
+}
+.md__switch:hover .md__name {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 6px;
+  text-decoration-thickness: 1px;
+}
+.md__switch:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 6px;
+}
+.md__caret {
+  display: inline-flex;
+  align-items: center;
+  color: var(--ink-mute);
+  margin-left: 6px;
+  transition:
+    color var(--t-fast) var(--ease-out),
+    transform var(--t-fast) var(--ease-out);
 }
 .md__name {
   margin: 0;
@@ -230,6 +336,44 @@ const statRows = computed(() => {
 }
 .md__spark {
   margin-top: 6px;
+}
+.md__watch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 14px;
+  margin-top: 8px;
+  border-radius: var(--r-1);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--tracking-mid);
+  text-transform: uppercase;
+  font-weight: 600;
+  background: transparent;
+  transition:
+    color var(--t-fast) var(--ease-out),
+    background var(--t-fast) var(--ease-out),
+    border-color var(--t-fast) var(--ease-out);
+}
+.md__watch-icon {
+  display: inline-flex;
+  align-items: center;
+}
+.md__watch--off {
+  color: var(--up);
+  border: 1px solid var(--up);
+}
+.md__watch--off:hover {
+  background: var(--up);
+  color: #0b0a08;
+}
+.md__watch--on {
+  color: var(--down);
+  border: 1px solid var(--down);
+}
+.md__watch--on:hover {
+  background: var(--down);
+  color: #0b0a08;
 }
 .md__placeholder {
   font-size: var(--fs-xs);

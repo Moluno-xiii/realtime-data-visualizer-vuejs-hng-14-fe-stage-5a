@@ -129,7 +129,7 @@ function isActive(item: { to: string; match?: string }) {
             <path d="m11 11 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
           </svg>
         </button>
-        <StatusPill :state="pillState" :latency-ms="latency" />
+        <StatusPill class="top__pill" :state="pillState" :latency-ms="latency" />
         <ThemeToggle />
         <RouterLink to="/settings" class="avatar" aria-label="Open settings">
           <span class="avatar__txt">TA</span>
@@ -363,6 +363,12 @@ function isActive(item: { to: string; match?: string }) {
     display: inline-flex;
   }
   .avatar {
+    display: none;
+  }
+  .nav--strip {
+    display: none;
+  }
+  .top__pill {
     display: none;
   }
 }

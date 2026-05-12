@@ -5,17 +5,22 @@ import SideRail from './SideRail.vue'
 import MobileDrawer from './MobileDrawer.vue'
 import SymbolPicker from '@/components/overlays/SymbolPicker.vue'
 import CommandPalette from '@/components/overlays/CommandPalette.vue'
+import MarketSwitcher from '@/components/overlays/MarketSwitcher.vue'
 import { useOverlays } from '@/composables/useOverlays'
 import { useDensity } from '@/composables/useDensity'
 import { useStream } from '@/composables/useStream'
 import { useSymbolsStore } from '@/stores/symbolsStore'
+import { useFocusedSymbol } from '@/composables/useFocusedSymbol'
 
 const {
   symbolPicker,
   closeSymbolPicker,
   commandPalette,
   closeCommandPalette,
+  marketSwitcher,
+  closeMarketSwitcher,
 } = useOverlays()
+const { focus } = useFocusedSymbol()
 
 useDensity()
 useStream()
@@ -35,6 +40,11 @@ useSymbolsStore().ensureLoaded()
     <MobileDrawer />
     <SymbolPicker :open="symbolPicker" @close="closeSymbolPicker" />
     <CommandPalette :open="commandPalette" @close="closeCommandPalette" />
+    <MarketSwitcher
+      :open="marketSwitcher"
+      :current="focus"
+      @close="closeMarketSwitcher"
+    />
     <footer class="shell__foot">
       <div class="shell__foot-left">
         <span class="eyebrow">TAPE //</span>

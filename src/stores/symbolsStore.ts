@@ -82,12 +82,11 @@ export const useSymbolsStore = defineStore('symbols', () => {
   const loaded = ref(false)
   const error = ref<string | null>(null)
 
-  async function ensureLoaded() {
-    if (loaded.value || loading.value) return
+  async function load() {
     loading.value = true
     error.value = null
     try {
-      const fetched = await binanceRest.fetchSymbols('USDT')
+      const fetched = await binanceRest.fetchSymbols()
       const decorated = fetched.map(decorate)
       const seedMap = new Map(seed.map((s) => [s.symbol, s]))
       const merged: SymbolInfo[] = decorated.map(
@@ -101,6 +100,16 @@ export const useSymbolsStore = defineStore('symbols', () => {
     } finally {
       loading.value = false
     }
+  }
+
+  async function ensureLoaded() {
+    if (loaded.value || loading.value) return
+    await load()
+  }
+
+  async function refresh() {
+    if (loading.value) return
+    await load()
   }
 
   function lookup(symbol: string): SymbolInfo {
@@ -126,5 +135,15 @@ export const useSymbolsStore = defineStore('symbols', () => {
 
   const all = computed(() => directory.value)
 
-  return { directory, bySymbol, all, loading, loaded, error, ensureLoaded, lookup }
+  return {
+    directory,
+    bySymbol,
+    all,
+    loading,
+    loaded,
+    error,
+    ensureLoaded,
+    refresh,
+    lookup,
+  }
 })
