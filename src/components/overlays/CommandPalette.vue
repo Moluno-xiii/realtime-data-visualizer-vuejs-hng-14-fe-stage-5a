@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import Modal from './Modal.vue'
-import { SYMBOLS } from '@/mocks/fixtures'
 import { useTheme } from '@/composables/useTheme'
 import { usePause } from '@/composables/usePause'
 import { useOverlays } from '@/composables/useOverlays'
+import { useSymbolsStore } from '@/stores/symbolsStore'
+import { useWatchlist } from '@/composables/useWatchlist'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ (e: 'close'): void }>()
@@ -14,6 +16,9 @@ const router = useRouter()
 const { toggle: toggleTheme } = useTheme()
 const { paused, toggle: togglePause } = usePause()
 const { openSymbolPicker } = useOverlays()
+const symbolsStore = useSymbolsStore()
+const { directory } = storeToRefs(symbolsStore)
+const { symbols: watchlistSymbols } = useWatchlist()
 
 type Item = {
   id: string
@@ -24,9 +29,15 @@ type Item = {
 }
 
 const ACTIONS = computed<Item[]>(() => {
-  const symbolItems: Item[] = SYMBOLS.map((s) => ({
+  const watch = new Set(watchlistSymbols.value)
+  const sorted = [...directory.value].sort((a, b) => {
+    const aw = watch.has(a.symbol) ? 0 : 1
+    const bw = watch.has(b.symbol) ? 0 : 1
+    return aw - bw
+  })
+  const symbolItems: Item[] = sorted.map((s) => ({
     id: `sym-${s.symbol}`,
-    group: 'Markets',
+    group: watch.has(s.symbol) ? 'Watchlist' : 'Markets',
     label: `${s.base} / ${s.quote}`,
     hint: s.name,
     action: () => router.push(`/markets/${s.symbol}`),
@@ -91,13 +102,21 @@ const idx = ref(0)
 
 const filtered = computed<Item[]>(() => {
   const term = q.value.trim().toLowerCase()
-  if (!term) return ACTIONS.value
-  return ACTIONS.value.filter(
-    (a) =>
+  if (!term) {
+    return ACTIONS.value.filter((a) => a.group !== 'Markets')
+  }
+  const out: Item[] = []
+  for (const a of ACTIONS.value) {
+    if (
       a.label.toLowerCase().includes(term) ||
       a.hint?.toLowerCase().includes(term) ||
-      a.group.toLowerCase().includes(term),
-  )
+      a.group.toLowerCase().includes(term)
+    ) {
+      out.push(a)
+      if (out.length >= 80) break
+    }
+  }
+  return out
 })
 
 const grouped = computed(() => {
@@ -119,6 +138,7 @@ watch(
     if (v) {
       q.value = ''
       idx.value = 0
+      symbolsStore.ensureLoaded()
       nextTick(() => {
         const el = document.getElementById('cp-input') as HTMLInputElement | null
         el?.focus()

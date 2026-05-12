@@ -9,6 +9,7 @@ import {
   chartPalette,
 } from '@/charts/echartsBootstrap'
 import type { Candle } from '@/types/market'
+import ChartLoading from './ChartLoading.vue'
 bootstrapECharts()
 
 const props = withDefaults(
@@ -23,7 +24,12 @@ const option = computed(() => {
     animationDuration: 220,
     tooltip: baseTooltip(),
     grid: baseGrid({ left: 56, right: 16, top: 16, bottom: 30 }),
-    xAxis: { type: 'time', ...baseAxisLine() },
+    xAxis: {
+      type: 'time',
+      min: props.candles[0]?.t,
+      max: props.candles[props.candles.length - 1]?.t,
+      ...baseAxisLine(),
+    },
     yAxis: { type: 'value', position: 'right', ...baseAxisLine() },
     series: [
       {
@@ -44,7 +50,8 @@ const option = computed(() => {
 </script>
 
 <template>
-  <div class="vb" :style="{ height: `${height}px` }">
+  <ChartLoading v-if="!candles.length" :height="height" label="Volume" />
+  <div v-else class="vb" :style="{ height: `${height}px` }">
     <VChart :option="option" :autoresize="true" />
   </div>
 </template>

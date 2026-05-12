@@ -9,6 +9,7 @@ import {
   chartPalette,
 } from '@/charts/echartsBootstrap'
 import type { Candle } from '@/types/market'
+import ChartLoading from './ChartLoading.vue'
 
 bootstrapECharts()
 
@@ -17,9 +18,38 @@ const props = withDefaults(
   { height: 360 },
 )
 
+function detectStepMs(times: number[]): number {
+  if (times.length < 2) return 60_000
+  const deltas: number[] = []
+  for (let i = 1; i < Math.min(times.length, 12); i++) {
+    deltas.push(times[i]! - times[i - 1]!)
+  }
+  deltas.sort((a, b) => a - b)
+  return deltas[Math.floor(deltas.length / 2)] ?? 60_000
+}
+
+function formatTick(t: number, stepMs: number): string {
+  const d = new Date(t)
+  if (stepMs >= 86_400_000) {
+    return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit' })
+  }
+  if (stepMs >= 3_600_000) {
+    return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit' }) +
+      ' ' +
+      d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit' }) + 'h'
+  }
+  return d.toLocaleTimeString('en-US', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 const option = computed(() => {
   const p = chartPalette()
   const xs = props.candles.map((c) => c.t)
+  const stepMs = detectStepMs(xs)
+  const labels = xs.map((t) => formatTick(t, stepMs))
   const ohlc = props.candles.map((c) => [c.o, c.c, c.l, c.h])
   const volumes = props.candles.map((c) => [
     c.t,
@@ -54,7 +84,7 @@ const option = computed(() => {
       { left: 56, right: 16, top: '74%', height: 56, containLabel: false },
     ],
     xAxis: [
-      { type: 'category', data: xs.map((t) => new Date(t).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })), ...baseAxisLine(), boundaryGap: true },
+      { type: 'category', data: labels, ...baseAxisLine(), boundaryGap: true },
       { type: 'category', data: xs, gridIndex: 1, show: false },
     ],
     yAxis: [
@@ -62,7 +92,7 @@ const option = computed(() => {
       { type: 'value', gridIndex: 1, show: false, scale: true },
     ],
     dataZoom: [
-      { type: 'inside', xAxisIndex: [0, 1], start: 60, end: 100 },
+      { type: 'inside', xAxisIndex: [0, 1], start: 0, end: 100 },
     ],
     series: [
       {
@@ -95,7 +125,8 @@ const option = computed(() => {
 </script>
 
 <template>
-  <div class="cs" :style="{ height: `${height}px` }">
+  <ChartLoading v-if="!candles.length" :height="height" />
+  <div v-else class="cs" :style="{ height: `${height}px` }">
     <VChart :option="option" :autoresize="true" />
   </div>
 </template>

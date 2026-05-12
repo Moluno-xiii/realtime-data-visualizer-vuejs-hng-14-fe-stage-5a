@@ -7,6 +7,8 @@ import SymbolPicker from '@/components/overlays/SymbolPicker.vue'
 import CommandPalette from '@/components/overlays/CommandPalette.vue'
 import { useOverlays } from '@/composables/useOverlays'
 import { useDensity } from '@/composables/useDensity'
+import { useStream } from '@/composables/useStream'
+import { useSymbolsStore } from '@/stores/symbolsStore'
 
 const {
   symbolPicker,
@@ -16,6 +18,8 @@ const {
 } = useOverlays()
 
 useDensity()
+useStream()
+useSymbolsStore().ensureLoaded()
 </script>
 
 <template>
@@ -25,11 +29,7 @@ useDensity()
     <div class="shell__body">
       <SideRail />
       <main class="shell__main">
-        <RouterView v-slot="{ Component }">
-          <Transition name="fade" mode="out-in">
-            <component :is="Component" />
-          </Transition>
-        </RouterView>
+        <RouterView />
       </main>
     </div>
     <MobileDrawer />
@@ -38,7 +38,7 @@ useDensity()
     <footer class="shell__foot">
       <div class="shell__foot-left">
         <span class="eyebrow">TAPE //</span>
-        <span class="muted">v0.1 · synthetic feed</span>
+        <span class="muted">Binance live feed</span>
       </div>
       <div class="shell__foot-right">
         <span class="muted mono">UTC {{ utc }}</span>
@@ -110,15 +110,6 @@ export default defineComponent({
 .muted {
   color: var(--ink-faint);
   font-size: var(--fs-xs);
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 180ms var(--ease-out);
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 
 @media (max-width: 960px) {

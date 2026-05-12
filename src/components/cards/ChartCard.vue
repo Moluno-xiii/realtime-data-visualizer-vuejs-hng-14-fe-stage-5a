@@ -37,6 +37,9 @@ defineProps<{
   border-radius: var(--r-1);
   box-shadow: var(--shadow-lift);
   min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 .cc__head {
   display: flex;
@@ -74,6 +77,14 @@ defineProps<{
 .cc__body {
   padding: var(--s-3) var(--s-4) var(--s-4);
   min-width: 0;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.cc__body > * {
+  min-height: 0;
 }
 .cc__foot {
   padding: var(--s-3) var(--s-4);
