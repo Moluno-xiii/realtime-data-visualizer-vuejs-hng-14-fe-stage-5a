@@ -1,24 +1,57 @@
 <script setup lang="ts">
-withDefaults(
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useStreamStore } from '@/stores/streamStore'
+
+const props = withDefaults(
   defineProps<{
     height?: number
     label?: string
     hint?: string
   }>(),
-  {
-    height: 320,
-    label: 'Streaming',
-    hint: 'awaiting first frame',
-  },
+  { height: 320 },
 )
+
+const stream = useStreamStore()
+const { state, lastReason, attempt } = storeToRefs(stream)
+
+const variant = computed<'streaming' | 'reconnecting' | 'offline'>(() => {
+  if (state.value === 'offline') return 'offline'
+  if (state.value === 'reconnecting' || state.value === 'idle')
+    return 'reconnecting'
+  return 'streaming'
+})
+
+const label = computed(() => {
+  if (props.label) return props.label
+  if (variant.value === 'offline') return 'Stream blocked'
+  if (variant.value === 'reconnecting') return 'Reconnecting'
+  return 'Streaming'
+})
+
+const hint = computed(() => {
+  if (props.hint) return props.hint
+  if (variant.value === 'offline') return 'binance unreachable'
+  if (variant.value === 'reconnecting')
+    return lastReason.value
+      ? lastReason.value
+      : `retrying connection · attempt ${attempt.value}`
+  return 'awaiting first frame'
+})
 </script>
 
 <template>
-  <div class="cl" :style="{ height: `${height}px` }" role="status" aria-live="polite">
+  <div
+    class="cl"
+    :data-variant="variant"
+    :style="{ height: `${height}px` }"
+    role="status"
+    aria-live="polite"
+  >
     <div class="cl__grid" aria-hidden="true">
       <span class="cl__hline" v-for="i in 4" :key="i"></span>
     </div>
-    <div class="cl__sweep" aria-hidden="true"></div>
+    <div v-if="variant !== 'offline'" class="cl__sweep" aria-hidden="true"></div>
     <div class="cl__head">
       <span class="cl__dot" aria-hidden="true"></span>
       <span class="cl__eyebrow">{{ label }}</span>
@@ -113,6 +146,18 @@ withDefaults(
   box-shadow: 0 0 8px var(--accent);
   animation: cl-pulse 1.6s ease-in-out infinite;
 }
+.cl[data-variant='reconnecting'] .cl__dot {
+  background: var(--warn);
+  box-shadow: 0 0 8px var(--warn);
+}
+.cl[data-variant='offline'] .cl__dot {
+  background: var(--down);
+  box-shadow: 0 0 8px var(--down);
+  animation: none;
+}
+.cl[data-variant='offline'] .cl__pulse {
+  color: var(--down);
+}
 .cl__eyebrow {
   font-size: var(--fs-xs);
   font-family: var(--font-tech, var(--font-mono));
@@ -162,5 +207,8 @@ withDefaults(
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   color: var(--ink-faint);
+  text-align: center;
+  max-width: 32ch;
 }
+
 </style>
