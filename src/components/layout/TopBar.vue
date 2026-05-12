@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
 import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
 import Brand from './Brand.vue'
 import StatusPill from '@/components/controls/StatusPill.vue'
 import ThemeToggle from '@/components/controls/ThemeToggle.vue'
@@ -29,7 +29,8 @@ const pillState = computed<'live' | 'paused' | 'reconnecting' | 'offline'>(() =>
 const latency = computed(() => Math.max(1, Math.round(rawLatency.value || 32)))
 
 const isMac =
-  typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform)
+  typeof navigator !== 'undefined' &&
+  /Mac|iPod|iPhone|iPad/.test(navigator.platform)
 const cmdKey = isMac ? '⌘' : 'Ctrl'
 
 function onKeydown(e: KeyboardEvent) {
@@ -41,7 +42,8 @@ function onKeydown(e: KeyboardEvent) {
     const target = e.target as HTMLElement | null
     const tag = target?.tagName
     const editable = target?.isContentEditable
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || editable) return
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || editable)
+      return
     e.preventDefault()
     togglePause()
   }
@@ -64,12 +66,14 @@ function isActive(item: { to: string; match?: string }) {
 </script>
 
 <template>
-  <header class="top">
-    <div class="top__bar">
-      <div class="top__left">
+  <header class="top sticky top-0 z-50 bg-bg border-b border-rule">
+    <div
+      class="top__bar grid items-center gap-4 px-5 h-[var(--top-h)] grid-cols-[minmax(0,1fr)_minmax(280px,520px)_minmax(0,1fr)]"
+    >
+      <div class="flex items-center gap-4 min-w-0">
         <button
-          class="hamburger"
           type="button"
+          class="hamburger w-8 h-8 hidden items-center justify-center border border-border rounded-1 bg-surface text-ink-dim transition-colors hover:text-ink hover:border-border-hi"
           aria-label="Open menu"
           @click="toggleDrawer"
         >
@@ -84,43 +88,45 @@ function isActive(item: { to: string; match?: string }) {
           </svg>
         </button>
         <Brand />
-        <div class="rule rule--v" aria-hidden="true"></div>
-        <nav class="nav nav--inline" aria-label="Primary">
+        <div class="rule-v w-px h-[22px] bg-rule" aria-hidden="true"></div>
+        <nav class="nav-inline flex gap-[2px]" aria-label="Primary">
           <RouterLink
             v-for="n in NAV"
             :key="n.to"
             :to="n.to"
-            class="nav__item"
-            :class="{ 'nav__item--active': isActive(n) }"
-            >{{ n.label }}</RouterLink
-          >
+            class="nav-item relative px-3 py-2 text-ink-mute text-sm uppercase tracking-[0.08em] font-medium whitespace-nowrap transition-colors hover:text-ink"
+            :class="isActive(n) ? '!text-ink active' : ''"
+          >{{ n.label }}</RouterLink>
         </nav>
       </div>
 
-      <div class="top__center">
+      <div class="top__center flex justify-center">
         <button
-          class="cmd"
           type="button"
+          class="cmd inline-flex items-center gap-[10px] w-full max-w-[520px] h-8 px-[10px] border border-border rounded-1 bg-surface text-ink-mute text-sm transition-colors hover:border-border-hi hover:text-ink-dim"
           aria-label="Open command palette"
           @click="openCommandPalette"
         >
-          <span class="cmd__icon" aria-hidden="true">
+          <span aria-hidden="true">
             <svg viewBox="0 0 16 16" width="13" height="13">
               <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" fill="none" />
               <path d="m11 11 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
             </svg>
           </span>
-          <span class="cmd__text">Search markets, signals, commands…</span>
-          <span class="cmd__kbd">
-            <kbd>{{ cmdKey }}</kbd><kbd>K</kbd>
+          <span class="flex-1 text-left whitespace-nowrap overflow-hidden text-ellipsis">
+            Search markets, signals, commands…
+          </span>
+          <span class="inline-flex gap-[2px]">
+            <kbd class="font-mono text-[10px] py-[1px] px-[5px] border border-border rounded-[3px] text-ink-mute bg-bg-elev">{{ cmdKey }}</kbd>
+            <kbd class="font-mono text-[10px] py-[1px] px-[5px] border border-border rounded-[3px] text-ink-mute bg-bg-elev">K</kbd>
           </span>
         </button>
       </div>
 
-      <div class="top__right">
+      <div class="flex items-center gap-3 justify-end">
         <button
-          class="cmd cmd--icon"
           type="button"
+          class="cmd-icon hidden w-8 h-8 items-center justify-center border border-border rounded-1 bg-surface text-ink-mute transition-colors hover:border-border-hi hover:text-ink-dim"
           aria-label="Open command palette"
           @click="openCommandPalette"
         >
@@ -129,101 +135,35 @@ function isActive(item: { to: string; match?: string }) {
             <path d="m11 11 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
           </svg>
         </button>
-        <StatusPill class="top__pill" :state="pillState" :latency-ms="latency" />
+        <StatusPill class="top-pill" :state="pillState" :latency-ms="latency" />
         <ThemeToggle />
-        <RouterLink to="/settings" class="avatar" aria-label="Open settings">
-          <span class="avatar__txt">TA</span>
+        <RouterLink
+          to="/settings"
+          class="avatar w-8 h-8 inline-flex items-center justify-center border border-border bg-surface font-mono text-[10px] tracking-[0.06em] text-ink-dim transition-colors hover:text-ink hover:border-accent"
+          aria-label="Open settings"
+        >
+          <span>TA</span>
         </RouterLink>
       </div>
     </div>
 
-    <nav class="nav nav--strip" aria-label="Primary">
+    <nav class="nav-strip hidden px-3 border-t border-rule overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Primary">
       <RouterLink
         v-for="n in NAV"
         :key="n.to"
         :to="n.to"
-        class="nav__item"
-        :class="{ 'nav__item--active': isActive(n) }"
-        >{{ n.label }}</RouterLink
-      >
+        class="nav-item relative px-3 py-[10px] text-ink-mute text-sm uppercase tracking-[0.08em] font-medium whitespace-nowrap transition-colors hover:text-ink"
+        :class="isActive(n) ? '!text-ink active' : ''"
+      >{{ n.label }}</RouterLink>
     </nav>
   </header>
 </template>
 
 <style scoped>
-.top {
-  background: var(--bg);
-  border-bottom: 1px solid var(--rule);
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-.top__bar {
-  height: var(--top-h);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 520px) minmax(0, 1fr);
-  align-items: center;
-  gap: var(--s-4);
-  padding: 0 var(--s-5);
-}
-
-.top__left {
+.nav-inline {
   display: flex;
-  align-items: center;
-  gap: var(--s-4);
-  min-width: 0;
 }
-
-.top__center {
-  display: flex;
-  justify-content: center;
-}
-
-.top__right {
-  display: flex;
-  align-items: center;
-  gap: var(--s-3);
-  justify-content: flex-end;
-}
-
-.rule--v {
-  width: 1px;
-  height: 22px;
-  background: var(--rule);
-}
-
-.nav {
-  display: flex;
-  gap: 2px;
-}
-.nav--strip {
-  display: none;
-  padding: 0 var(--s-3);
-  border-top: 1px solid var(--rule);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.nav--strip::-webkit-scrollbar {
-  display: none;
-}
-.nav__item {
-  position: relative;
-  padding: 8px 12px;
-  color: var(--ink-mute);
-  font-size: var(--fs-sm);
-  letter-spacing: var(--tracking-mid);
-  text-transform: uppercase;
-  font-weight: 500;
-  white-space: nowrap;
-  transition: color var(--t-fast) var(--ease-out);
-}
-.nav__item:hover {
-  color: var(--ink);
-}
-.nav__item--active {
-  color: var(--ink);
-}
-.nav__item--active::after {
+.nav-item.active::after {
   content: '';
   position: absolute;
   left: 12px;
@@ -233,98 +173,8 @@ function isActive(item: { to: string; match?: string }) {
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent);
 }
-.nav--strip .nav__item {
-  padding: 10px 12px;
-}
-.nav--strip .nav__item--active::after {
+.nav-strip .nav-item.active::after {
   bottom: 0;
-}
-
-.cmd {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  max-width: 520px;
-  height: 32px;
-  padding: 0 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-1);
-  background: var(--surface);
-  color: var(--ink-mute);
-  font-size: var(--fs-sm);
-  transition: border-color var(--t-fast) var(--ease-out);
-}
-.cmd:hover {
-  border-color: var(--border-hi);
-  color: var(--ink-dim);
-}
-.cmd--icon {
-  display: none;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  justify-content: center;
-}
-.cmd__text {
-  flex: 1;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.cmd__kbd {
-  display: inline-flex;
-  gap: 2px;
-}
-.cmd__kbd kbd {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  padding: 1px 5px;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  color: var(--ink-mute);
-  background: var(--bg-elev);
-}
-
-.avatar {
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  color: var(--ink-dim);
-  transition:
-    color var(--t-fast) var(--ease-out),
-    border-color var(--t-fast) var(--ease-out);
-}
-.avatar:hover {
-  color: var(--ink);
-  border-color: var(--accent);
-}
-
-.hamburger {
-  display: none;
-  width: 32px;
-  height: 32px;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border);
-  border-radius: var(--r-1);
-  background: var(--surface);
-  color: var(--ink-dim);
-  transition:
-    color var(--t-fast) var(--ease-out),
-    border-color var(--t-fast) var(--ease-out);
-}
-.hamburger:hover {
-  color: var(--ink);
-  border-color: var(--border-hi);
 }
 
 @media (max-width: 1200px) {
@@ -334,19 +184,19 @@ function isActive(item: { to: string; match?: string }) {
   .top__center {
     display: none;
   }
-  .cmd--icon {
+  .cmd-icon {
     display: inline-flex;
   }
 }
 
 @media (max-width: 1024px) {
-  .nav--inline {
+  .nav-inline {
     display: none;
   }
-  .nav--strip {
+  .nav-strip {
     display: flex;
   }
-  .rule--v {
+  .rule-v {
     display: none;
   }
 }
@@ -356,19 +206,16 @@ function isActive(item: { to: string; match?: string }) {
     padding: 0 var(--s-3);
     gap: var(--s-2);
   }
-  .top__right {
-    gap: 6px;
-  }
   .hamburger {
     display: inline-flex;
   }
   .avatar {
     display: none;
   }
-  .nav--strip {
+  .nav-strip {
     display: none;
   }
-  .top__pill {
+  .top-pill {
     display: none;
   }
 }

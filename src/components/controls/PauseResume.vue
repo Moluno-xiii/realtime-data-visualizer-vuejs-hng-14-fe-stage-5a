@@ -5,55 +5,21 @@ defineEmits<{ (e: 'update:paused', v: boolean): void }>()
 
 <template>
   <button
-    class="pr"
     type="button"
+    class="inline-flex items-center gap-2 h-7 px-[10px] border border-border rounded-1 bg-surface text-ink-dim text-xs uppercase tracking-[0.08em] transition-colors hover:text-ink hover:border-border-hi aria-pressed:text-warn aria-pressed:border-warn aria-pressed:bg-warn-soft"
     :aria-pressed="paused"
     :aria-label="paused ? 'Resume stream' : 'Pause stream'"
     @click="$emit('update:paused', !paused)"
   >
-    <span v-if="paused" class="pr__icon" aria-hidden="true">
-      <svg width="10" height="10" viewBox="0 0 10 10">
+    <span aria-hidden="true" class="inline-flex">
+      <svg v-if="paused" width="10" height="10" viewBox="0 0 10 10">
         <path d="M1 1l8 4-8 4z" fill="currentColor" />
       </svg>
-    </span>
-    <span v-else class="pr__icon" aria-hidden="true">
-      <svg width="10" height="10" viewBox="0 0 10 10">
+      <svg v-else width="10" height="10" viewBox="0 0 10 10">
         <rect x="1" y="1" width="3" height="8" fill="currentColor" />
         <rect x="6" y="1" width="3" height="8" fill="currentColor" />
       </svg>
     </span>
-    <span class="pr__lab">{{ paused ? 'Resume' : 'Pause' }}</span>
+    <span>{{ paused ? 'Resume' : 'Pause' }}</span>
   </button>
 </template>
-
-<style scoped>
-.pr {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 28px;
-  padding: 0 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-1);
-  background: var(--surface);
-  color: var(--ink-dim);
-  font-size: var(--fs-xs);
-  letter-spacing: var(--tracking-mid);
-  text-transform: uppercase;
-  transition:
-    border-color var(--t-fast) var(--ease-out),
-    color var(--t-fast) var(--ease-out);
-}
-.pr:hover {
-  color: var(--ink);
-  border-color: var(--border-hi);
-}
-.pr[aria-pressed='true'] {
-  color: var(--warn);
-  border-color: var(--warn);
-  background: var(--warn-soft);
-}
-.pr__icon {
-  display: inline-flex;
-}
-</style>

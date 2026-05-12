@@ -4,62 +4,23 @@ defineProps<{ label?: string }>()
 </script>
 
 <template>
-  <article class="card">
-    <header class="card__head">
+  <article class="flex flex-col gap-[6px] px-4 pt-4 pb-3 bg-surface border border-border rounded-1 shadow-[var(--shadow-lift)]">
+    <header class="flex items-center justify-between">
       <span class="eyebrow">{{ label ?? 'Loading' }}</span>
       <Skeleton width="20" height="12" />
     </header>
-    <div class="card__value">
+    <div class="flex items-baseline gap-[6px]">
       <Skeleton width="16" height="20" />
       <Skeleton width="120" height="30" />
     </div>
-    <div class="card__meta">
+    <div class="flex items-center gap-2">
       <Skeleton width="56" height="11" />
       <Skeleton width="40" height="11" />
-      <span class="card__sep"></span>
+      <span class="w-px h-[10px] bg-rule"></span>
       <Skeleton width="22" height="9" />
     </div>
-    <div class="card__spark">
+    <div class="mt-1 w-[220px] self-end -mr-2">
       <Skeleton block width="100%" height="44" />
     </div>
   </article>
 </template>
-
-<style scoped>
-.card {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: var(--s-4) var(--s-4) var(--s-3);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-1);
-  box-shadow: var(--shadow-lift);
-}
-.card__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.card__value {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-.card__meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.card__sep {
-  width: 1px;
-  height: 10px;
-  background: var(--rule);
-}
-.card__spark {
-  margin-top: 4px;
-  width: 220px;
-  align-self: flex-end;
-  margin-right: -8px;
-}
-</style>

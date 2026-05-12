@@ -1,4 +1,78 @@
 @import './tokens.css';
+@import 'tailwindcss';
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-elev: var(--bg-elev);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-hi: var(--surface-hi);
+
+  --color-border: var(--border);
+  --color-border-hi: var(--border-hi);
+  --color-rule: var(--rule);
+
+  --color-ink: var(--ink);
+  --color-ink-dim: var(--ink-dim);
+  --color-ink-mute: var(--ink-mute);
+  --color-ink-faint: var(--ink-faint);
+
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-wash: var(--accent-wash);
+
+  --color-up: var(--up);
+  --color-up-soft: var(--up-soft);
+  --color-down: var(--down);
+  --color-down-soft: var(--down-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-info: var(--info);
+
+  --font-display: var(--font-display);
+  --font-tech: var(--font-tech);
+  --font-glyph: var(--font-glyph);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  --radius-1: var(--r-1);
+  --radius-2: var(--r-2);
+  --radius-pill: var(--r-pill);
+
+  --spacing-1: var(--s-1);
+  --spacing-2: var(--s-2);
+  --spacing-3: var(--s-3);
+  --spacing-4: var(--s-4);
+  --spacing-5: var(--s-5);
+  --spacing-6: var(--s-6);
+  --spacing-7: var(--s-7);
+  --spacing-8: var(--s-8);
+  --spacing-9: var(--s-9);
+  --spacing-10: var(--s-10);
+
+  --text-xs: var(--fs-xs);
+  --text-sm: var(--fs-sm);
+  --text-md: var(--fs-md);
+  --text-lg: var(--fs-lg);
+  --text-xl: var(--fs-xl);
+  --text-2xl: var(--fs-2xl);
+  --text-3xl: var(--fs-3xl);
+  --text-4xl: var(--fs-4xl);
+  --text-hero: var(--fs-hero);
+
+  --ease-in-out: var(--ease-in-out);
+  --ease-out: var(--ease-out);
+
+  --animate-pulse-dot: pulse-dot 1.6s ease-in-out infinite;
+  --animate-pulse-fast: pulse-dot 0.8s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.8s linear infinite;
+  --animate-flash-up: flash-up 600ms var(--ease-out);
+  --animate-flash-down: flash-down 600ms var(--ease-out);
+
+  --shadow-lift: var(--shadow-lift);
+  --shadow-glow: var(--glow);
+}
 
 *,
 *::before,
@@ -212,6 +286,17 @@ textarea {
   background-size: 200% 100%;
   animation: shimmer 1.8s linear infinite;
   border-radius: var(--r-1);
+}
+
+.skeleton-bar {
+  background: linear-gradient(
+    90deg,
+    var(--surface-hi) 0%,
+    var(--surface-2) 50%,
+    var(--surface-hi) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s linear infinite;
 }
 
 .reveal {

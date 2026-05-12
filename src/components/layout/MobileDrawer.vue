@@ -9,10 +9,10 @@ import { useOverlays } from '@/composables/useOverlays'
 import { useFocusedSymbol } from '@/composables/useFocusedSymbol'
 import { useMarketStore } from '@/stores/marketStore'
 import { useSymbolsStore } from '@/stores/symbolsStore'
-import EmptyState from '@/components/feedback/EmptyState.vue'
 import Brand from './Brand.vue'
 import ThemeToggle from '@/components/controls/ThemeToggle.vue'
 import StatusPill from '@/components/controls/StatusPill.vue'
+import EmptyState from '@/components/feedback/EmptyState.vue'
 
 const { open, hide } = useMobileDrawer()
 const { symbols } = useWatchlist()
@@ -75,7 +75,7 @@ onBeforeUnmount(() => {
     <Transition name="fade">
       <div
         v-if="open"
-        class="backdrop"
+        class="fixed inset-0 z-[90] bg-black/50 backdrop-blur-[2px]"
         role="presentation"
         @click="hide"
       ></div>
@@ -83,14 +83,19 @@ onBeforeUnmount(() => {
     <Transition name="slide">
       <aside
         v-if="open"
-        class="drawer"
+        class="fixed top-0 left-0 bottom-0 w-[min(86vw,340px)] bg-bg border-r border-rule z-[100] flex flex-col min-h-0 shadow-[24px_0_48px_-16px_rgba(0,0,0,0.5)]"
         role="dialog"
         aria-modal="true"
         aria-label="Navigation"
       >
-        <header class="drawer__head">
+        <header class="flex items-center justify-between px-4 py-[14px] border-b border-rule">
           <Brand subtle />
-          <button class="drawer__close" type="button" aria-label="Close" @click="hide">
+          <button
+            type="button"
+            class="w-[30px] h-[30px] border border-border rounded-1 inline-flex items-center justify-center text-ink-dim bg-surface hover:text-ink hover:border-border-hi"
+            aria-label="Close"
+            @click="hide"
+          >
             <svg viewBox="0 0 16 16" width="14" height="14">
               <path
                 d="M3 3l10 10M13 3L3 13"
@@ -102,32 +107,36 @@ onBeforeUnmount(() => {
           </button>
         </header>
 
-        <div class="drawer__status">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-rule">
           <StatusPill state="live" :latency-ms="38" />
           <ThemeToggle />
         </div>
 
-        <nav class="drawer__nav" aria-label="Primary">
+        <nav class="flex flex-col py-[6px]" aria-label="Primary">
           <RouterLink
             v-for="n in NAV"
             :key="n.to"
             :to="n.to"
-            class="drawer__navitem"
-            :class="{ 'drawer__navitem--active': isActive(n) }"
+            class="flex items-center justify-between gap-2 px-4 py-3 text-ink-dim text-md uppercase tracking-[0.08em] border-l-[2px] border-transparent transition-colors hover:bg-surface hover:text-ink"
+            :class="isActive(n) ? '!bg-surface !text-ink !border-l-accent' : ''"
           >
-            <span class="drawer__navlabel">{{ n.label }}</span>
-            <span class="drawer__navarrow" aria-hidden="true">→</span>
+            <span>{{ n.label }}</span>
+            <span class="text-ink-faint font-mono" aria-hidden="true">→</span>
           </RouterLink>
         </nav>
 
-        <div class="drawer__section">
+        <div class="flex items-center justify-between px-4 pt-3 pb-[6px]">
           <span class="eyebrow">Watchlist</span>
-          <button type="button" class="drawer__manage" @click="manage">
+          <button
+            type="button"
+            class="text-xs uppercase tracking-[0.08em] text-ink-mute border border-border rounded-1 px-2 py-[4px] hover:text-ink hover:border-border-hi"
+            @click="manage"
+          >
             Manage
           </button>
         </div>
         <hr class="rule" />
-        <div v-if="!watchlist.length" class="drawer__empty">
+        <div v-if="!watchlist.length" class="px-4 py-3 flex-1 min-h-0 overflow-y-auto">
           <EmptyState
             compact
             eyebrow="Watchlist"
@@ -137,20 +146,23 @@ onBeforeUnmount(() => {
             @action="manage"
           />
         </div>
-        <ul v-else class="drawer__list" role="list">
+        <ul v-else class="list-none m-0 p-0 overflow-y-auto flex-1 min-h-0" role="list">
           <li v-for="r in watchlist" :key="r.symbol">
-            <RouterLink :to="`/markets/${r.symbol}`" class="wrow">
-              <span class="wrow__sym">
-                <span class="wrow__icon" aria-hidden="true">{{ r.info.icon }}</span>
-                <span class="wrow__base">{{ r.info.base }}</span>
-                <span class="wrow__quote">/{{ r.info.quote }}</span>
+            <RouterLink
+              :to="`/markets/${r.symbol}`"
+              class="flex items-center justify-between gap-3 py-[9px] px-4 text-ink-dim border-l-[2px] border-transparent hover:bg-surface hover:text-ink"
+            >
+              <span class="inline-flex items-baseline gap-[6px] text-sm">
+                <span class="w-4 text-center text-ink-mute" aria-hidden="true">{{ r.info.icon }}</span>
+                <span class="font-semibold">{{ r.info.base }}</span>
+                <span class="text-ink-faint text-xs">/{{ r.info.quote }}</span>
               </span>
-              <span class="wrow__values">
-                <span class="wrow__price mono">
+              <span class="inline-flex flex-col items-end gap-[1px]">
+                <span class="text-sm text-ink font-mono">
                   {{ r.ticker ? formatPrice(r.ticker.price) : '—' }}
                 </span>
                 <span
-                  class="wrow__chg mono"
+                  class="text-xs font-mono"
                   :class="r.ticker && r.ticker.changePct24h >= 0 ? 'up' : 'down'"
                 >{{ r.ticker ? formatPct(r.ticker.changePct24h) : '—' }}</span>
               </span>
@@ -158,9 +170,9 @@ onBeforeUnmount(() => {
           </li>
         </ul>
 
-        <footer class="drawer__foot">
+        <footer class="flex items-center justify-between px-4 py-3 border-t border-rule">
           <span class="eyebrow">TAPE //</span>
-          <span class="muted">Binance live</span>
+          <span class="text-xs text-ink-faint">Binance live</span>
         </footer>
       </aside>
     </Transition>
@@ -168,182 +180,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(2px);
-  z-index: 90;
-}
-
-.drawer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: min(86vw, 340px);
-  background: var(--bg);
-  border-right: 1px solid var(--rule);
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  box-shadow: 24px 0 48px -16px rgba(0, 0, 0, 0.5);
-}
-
-.drawer__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--rule);
-}
-.drawer__close {
-  width: 30px;
-  height: 30px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-1);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ink-dim);
-  background: var(--surface);
-}
-.drawer__close:hover {
-  color: var(--ink);
-  border-color: var(--border-hi);
-}
-
-.drawer__status {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--rule);
-}
-
-.drawer__nav {
-  display: flex;
-  flex-direction: column;
-  padding: 6px 0;
-}
-.drawer__navitem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 12px 16px;
-  color: var(--ink-dim);
-  font-size: var(--fs-md);
-  letter-spacing: var(--tracking-mid);
-  text-transform: uppercase;
-  border-left: 2px solid transparent;
-  transition: background var(--t-fast) var(--ease-out);
-}
-.drawer__navitem:hover {
-  background: var(--surface);
-  color: var(--ink);
-}
-.drawer__navitem--active {
-  background: var(--surface);
-  color: var(--ink);
-  border-left-color: var(--accent);
-}
-.drawer__navarrow {
-  color: var(--ink-faint);
-  font-family: var(--font-mono);
-}
-
-.drawer__section {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px 6px;
-}
-.drawer__manage {
-  font-size: var(--fs-xs);
-  letter-spacing: var(--tracking-mid);
-  text-transform: uppercase;
-  color: var(--ink-mute);
-  border: 1px solid var(--border);
-  border-radius: var(--r-1);
-  padding: 4px 8px;
-}
-.drawer__manage:hover {
-  color: var(--ink);
-  border-color: var(--border-hi);
-}
-.drawer__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-}
-.drawer__empty {
-  padding: 12px 16px;
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-.wrow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s-3);
-  padding: 9px 16px;
-  color: var(--ink-dim);
-  border-left: 2px solid transparent;
-}
-.wrow:hover {
-  background: var(--surface);
-  color: var(--ink);
-}
-.wrow__sym {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  font-size: var(--fs-sm);
-}
-.wrow__icon {
-  width: 16px;
-  text-align: center;
-  color: var(--ink-mute);
-}
-.wrow__base {
-  font-weight: 600;
-}
-.wrow__quote {
-  color: var(--ink-faint);
-  font-size: var(--fs-xs);
-}
-.wrow__values {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 1px;
-}
-.wrow__price {
-  font-size: var(--fs-sm);
-  color: var(--ink);
-}
-.wrow__chg {
-  font-size: var(--fs-xs);
-}
-
-.drawer__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-top: 1px solid var(--rule);
-}
-.muted {
-  color: var(--ink-faint);
-  font-size: var(--fs-xs);
-}
-
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 200ms var(--ease-out);
@@ -352,7 +188,6 @@ onBeforeUnmount(() => {
 .fade-leave-to {
   opacity: 0;
 }
-
 .slide-enter-active,
 .slide-leave-active {
   transition: transform 260ms var(--ease-out);

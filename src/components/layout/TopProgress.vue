@@ -65,7 +65,7 @@ onBeforeUnmount(() => {
 <template>
   <div
     v-if="visible"
-    class="tp"
+    class="fixed top-0 left-0 right-0 h-[2px] z-[9999] pointer-events-none bg-transparent"
     role="progressbar"
     aria-label="Loading route"
     :aria-valuenow="Math.round(progress)"
@@ -73,30 +73,8 @@ onBeforeUnmount(() => {
     aria-valuemax="100"
   >
     <span
-      class="tp__bar"
+      class="block h-full bg-accent shadow-[0_0_8px_var(--accent)] transition-[width,opacity] [transition-duration:180ms,220ms]"
       :style="{ width: `${progress}%`, opacity: active ? 1 : 0 }"
     ></span>
   </div>
 </template>
-
-<style scoped>
-.tp {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  z-index: 9999;
-  pointer-events: none;
-  background: transparent;
-}
-.tp__bar {
-  display: block;
-  height: 100%;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
-  transition:
-    width 180ms cubic-bezier(0.2, 0.65, 0.18, 1),
-    opacity 220ms var(--ease-out);
-}
-</style>

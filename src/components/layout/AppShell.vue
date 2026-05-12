@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import TickerTape from './TickerTape.vue'
 import TopBar from './TopBar.vue'
 import SideRail from './SideRail.vue'
@@ -25,15 +26,28 @@ const { focus } = useFocusedSymbol()
 useDensity()
 useStream()
 useSymbolsStore().ensureLoaded()
+
+const utc = ref('')
+let utcId: number | undefined
+const fmt = () => {
+  utc.value = new Date().toISOString().slice(11, 19)
+}
+onMounted(() => {
+  fmt()
+  utcId = window.setInterval(fmt, 1000)
+})
+onBeforeUnmount(() => {
+  if (utcId) clearInterval(utcId)
+})
 </script>
 
 <template>
-  <div class="shell">
+  <div class="shell grid grid-rows-[auto_auto_1fr_auto] h-dvh min-h-dvh">
     <TickerTape />
     <TopBar />
-    <div class="shell__body">
+    <div class="shell__body grid grid-cols-[var(--rail-w)_1fr] min-h-0 overflow-hidden">
       <SideRail />
-      <main class="shell__main">
+      <main class="min-w-0 min-h-0 overflow-auto bg-bg relative">
         <RouterView />
       </main>
     </div>
@@ -45,83 +59,19 @@ useSymbolsStore().ensureLoaded()
       :current="focus"
       @close="closeMarketSwitcher"
     />
-    <footer class="shell__foot">
-      <div class="shell__foot-left">
+    <footer class="flex items-center justify-between h-7 px-5 border-t border-rule bg-bg">
+      <div class="flex items-center gap-[10px]">
         <span class="eyebrow">TAPE //</span>
-        <span class="muted">Binance live feed</span>
+        <span class="text-xs text-ink-faint">Binance live feed</span>
       </div>
-      <div class="shell__foot-right">
-        <span class="muted mono">UTC {{ utc }}</span>
+      <div class="flex items-center gap-[10px]">
+        <span class="text-xs text-ink-faint font-mono">UTC {{ utc }}</span>
       </div>
     </footer>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, onMounted, onBeforeUnmount } from 'vue'
-export default defineComponent({
-  setup() {
-    const utc = ref('')
-    let id: number | undefined
-    const fmt = () => {
-      const d = new Date()
-      utc.value = d.toISOString().slice(11, 19)
-    }
-    onMounted(() => {
-      fmt()
-      id = window.setInterval(fmt, 1000)
-    })
-    onBeforeUnmount(() => {
-      if (id) clearInterval(id)
-    })
-    return { utc }
-  },
-})
-</script>
-
 <style scoped>
-.shell {
-  display: grid;
-  grid-template-rows: auto auto 1fr auto;
-  height: 100dvh;
-  min-height: 100dvh;
-}
-
-.shell__body {
-  display: grid;
-  grid-template-columns: var(--rail-w) 1fr;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.shell__main {
-  min-width: 0;
-  min-height: 0;
-  overflow: auto;
-  background: var(--bg);
-  position: relative;
-}
-
-.shell__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px var(--s-5);
-  border-top: 1px solid var(--rule);
-  background: var(--bg);
-  height: 28px;
-}
-.shell__foot-left,
-.shell__foot-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.muted {
-  color: var(--ink-faint);
-  font-size: var(--fs-xs);
-}
-
 @media (max-width: 960px) {
   .shell__body {
     grid-template-columns: 1fr;

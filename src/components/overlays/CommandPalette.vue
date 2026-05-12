@@ -8,6 +8,7 @@ import { usePause } from '@/composables/usePause'
 import { useOverlays } from '@/composables/useOverlays'
 import { useSymbolsStore } from '@/stores/symbolsStore'
 import { useWatchlist } from '@/composables/useWatchlist'
+import { useRecentSymbols } from '@/composables/useRecentSymbols'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ (e: 'close'): void }>()
@@ -19,6 +20,7 @@ const { openSymbolPicker } = useOverlays()
 const symbolsStore = useSymbolsStore()
 const { directory } = storeToRefs(symbolsStore)
 const { symbols: watchlistSymbols } = useWatchlist()
+const { recent } = useRecentSymbols()
 
 type Item = {
   id: string
@@ -30,11 +32,27 @@ type Item = {
 
 const ACTIONS = computed<Item[]>(() => {
   const watch = new Set(watchlistSymbols.value)
-  const sorted = [...directory.value].sort((a, b) => {
-    const aw = watch.has(a.symbol) ? 0 : 1
-    const bw = watch.has(b.symbol) ? 0 : 1
-    return aw - bw
-  })
+  const recentSet = new Set(recent.value)
+
+  const dirBySymbol = new Map(directory.value.map((s) => [s.symbol, s]))
+  const recentItems: Item[] = recent.value
+    .map((sym) => dirBySymbol.get(sym))
+    .filter((s): s is NonNullable<typeof s> => Boolean(s))
+    .map((s) => ({
+      id: `recent-${s.symbol}`,
+      group: 'Recent',
+      label: `${s.base} / ${s.quote}`,
+      hint: s.name,
+      action: () => router.push(`/markets/${s.symbol}`),
+    }))
+
+  const sorted = [...directory.value]
+    .filter((s) => !recentSet.has(s.symbol))
+    .sort((a, b) => {
+      const aw = watch.has(a.symbol) ? 0 : 1
+      const bw = watch.has(b.symbol) ? 0 : 1
+      return aw - bw
+    })
   const symbolItems: Item[] = sorted.map((s) => ({
     id: `sym-${s.symbol}`,
     group: watch.has(s.symbol) ? 'Watchlist' : 'Markets',
@@ -94,7 +112,7 @@ const ACTIONS = computed<Item[]>(() => {
     },
   ]
 
-  return [...routeItems, ...actionItems, ...symbolItems]
+  return [...recentItems, ...routeItems, ...actionItems, ...symbolItems]
 })
 
 const q = ref('')
@@ -170,9 +188,9 @@ function onKey(e: KeyboardEvent) {
 
 <template>
   <Modal :open="open" label="Command palette" @close="emit('close')">
-    <div class="cp" @keydown="onKey">
-      <div class="cp__search">
-        <span class="cp__icon" aria-hidden="true">
+    <div class="flex flex-col min-h-0 flex-1" @keydown="onKey">
+      <div class="flex items-center gap-[10px] px-[18px] py-[14px] border-b border-rule text-ink-mute">
+        <span aria-hidden="true">
           <svg viewBox="0 0 16 16" width="14" height="14">
             <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4" fill="none" />
             <path d="m11 11 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
@@ -182,151 +200,72 @@ function onKey(e: KeyboardEvent) {
           id="cp-input"
           v-model="q"
           type="text"
-          class="cp__input"
+          class="flex-1 bg-transparent border-0 outline-0 text-ink text-lg font-body min-w-0 placeholder:text-ink-faint"
           placeholder="Jump to a market, route, or action…"
           aria-label="Search commands"
           autocomplete="off"
         />
-        <span class="cp__esc">esc</span>
+        <span class="font-mono text-[10px] tracking-[0.06em] text-ink-mute border border-border rounded-[3px] px-[6px] py-[2px] bg-bg-elev">esc</span>
       </div>
 
-      <div class="cp__list">
+      <div class="cp-list overflow-y-auto flex-1 min-h-0">
         <template v-for="[group, items] in grouped" :key="group">
-          <div class="cp__group">
+          <div class="cp-group">
             <span class="eyebrow">{{ group }}</span>
           </div>
           <button
             v-for="item in items"
             :key="item.id"
             type="button"
-            class="cp__item"
-            :class="{ 'cp__item--active': filtered[idx]?.id === item.id }"
+            class="cp-row flex items-center justify-between w-full rounded-1 text-left text-ink-dim transition-colors hover:bg-surface-hi/40"
+            :class="
+              filtered[idx]?.id === item.id
+                ? 'bg-surface-hi text-ink ring-1 ring-inset ring-accent'
+                : ''
+            "
             @click="run(item)"
             @mouseenter="idx = filtered.findIndex((i) => i.id === item.id)"
           >
-            <span class="cp__label">{{ item.label }}</span>
-            <span class="cp__hint mono">{{ item.hint }}</span>
+            <span class="text-md">{{ item.label }}</span>
+            <span class="font-mono text-xs text-ink-faint">{{ item.hint }}</span>
           </button>
         </template>
-        <div v-if="!filtered.length" class="cp__empty">
+        <div v-if="!filtered.length" class="px-4 py-8 text-center text-ink-mute text-sm">
           No commands match "{{ q }}".
         </div>
       </div>
 
-      <footer class="cp__foot">
-        <span class="cp__legend"><kbd>↑↓</kbd> navigate</span>
-        <span class="cp__legend"><kbd>↵</kbd> run</span>
-        <span class="cp__legend"><kbd>esc</kbd> close</span>
+      <footer class="flex items-center gap-[14px] px-[14px] py-[10px] border-t border-rule bg-bg-elev">
+        <span class="text-xs uppercase tracking-[0.08em] text-ink-faint inline-flex items-center gap-[6px]">
+          <kbd class="font-mono text-[10px] py-[1px] px-[5px] border border-border rounded-[3px] text-ink-mute bg-surface">↑↓</kbd>
+          navigate
+        </span>
+        <span class="text-xs uppercase tracking-[0.08em] text-ink-faint inline-flex items-center gap-[6px]">
+          <kbd class="font-mono text-[10px] py-[1px] px-[5px] border border-border rounded-[3px] text-ink-mute bg-surface">↵</kbd>
+          run
+        </span>
+        <span class="text-xs uppercase tracking-[0.08em] text-ink-faint inline-flex items-center gap-[6px]">
+          <kbd class="font-mono text-[10px] py-[1px] px-[5px] border border-border rounded-[3px] text-ink-mute bg-surface">esc</kbd>
+          close
+        </span>
       </footer>
     </div>
   </Modal>
 </template>
 
+
 <style scoped>
-.cp {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  flex: 1;
+.cp-list {
+  padding: 8px 16px 16px;
 }
-
-.cp__search {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--rule);
-  color: var(--ink-mute);
+.cp-group {
+  padding: 12px 20px 8px;
 }
-.cp__input {
-  flex: 1;
-  background: transparent;
-  border: 0;
-  outline: 0;
-  color: var(--ink);
-  font-size: var(--fs-lg);
-  font-family: var(--font-body);
-  min-width: 0;
+.cp-list > .cp-group:first-child {
+  padding-top: 4px;
 }
-.cp__input::placeholder {
-  color: var(--ink-faint);
-}
-.cp__esc {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  color: var(--ink-mute);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 2px 6px;
-  background: var(--bg-elev);
-}
-
-.cp__list {
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-  padding: 6px 6px 8px;
-}
-.cp__group {
-  padding: 10px 10px 4px;
-}
-
-.cp__item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 9px 12px;
-  border-radius: var(--r-1);
-  text-align: left;
-  color: var(--ink-dim);
-}
-.cp__item--active {
-  background: var(--surface-hi);
-  color: var(--ink);
-  outline: 1px solid var(--accent);
-  outline-offset: -1px;
-}
-.cp__label {
-  font-size: var(--fs-md);
-}
-.cp__hint {
-  font-size: var(--fs-xs);
-  color: var(--ink-faint);
-}
-
-.cp__empty {
-  padding: 24px 12px;
-  text-align: center;
-  color: var(--ink-mute);
-  font-size: var(--fs-sm);
-}
-
-.cp__foot {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 10px 14px;
-  border-top: 1px solid var(--rule);
-  background: var(--bg-elev);
-}
-.cp__legend {
-  font-size: var(--fs-xs);
-  letter-spacing: var(--tracking-mid);
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.cp__legend kbd {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  padding: 1px 5px;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  color: var(--ink-mute);
-  background: var(--surface);
+.cp-row {
+  padding: 14px 20px;
+  margin: 2px 0;
 }
 </style>

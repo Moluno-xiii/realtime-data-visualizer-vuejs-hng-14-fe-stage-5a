@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import Modal from './Modal.vue'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     open: boolean
     title: string
@@ -22,127 +23,47 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-function onCancel() {
-  emit('cancel')
-}
-function onConfirm() {
-  emit('confirm')
-}
+const titleClass = computed(() => {
+  if (props.variant === 'danger') return 'text-down'
+  if (props.variant === 'success') return 'text-up'
+  return 'text-ink'
+})
+const confirmClass = computed(() => {
+  if (props.variant === 'danger') return 'bg-down text-[#0b0a08] border-down'
+  if (props.variant === 'success') return 'bg-up text-[#0b0a08] border-up'
+  return 'bg-accent text-accent-ink border-accent'
+})
 </script>
 
 <template>
-  <Modal :open="open" :label="title" @close="onCancel">
-    <div class="cm">
-      <header class="cm__head">
+  <Modal :open="open" :label="title" @close="emit('cancel')">
+    <div class="flex flex-col min-h-0">
+      <header class="px-[22px] pt-[22px] pb-[18px] flex flex-col gap-[6px]">
         <span v-if="eyebrow" class="eyebrow">{{ eyebrow }}</span>
-        <h2 class="cm__title" :data-variant="variant">{{ title }}</h2>
-        <p v-if="body" class="cm__body">{{ body }}</p>
+        <h2
+          class="m-0 font-tech font-bold text-[22px] tracking-[-0.02em] lowercase"
+          :class="titleClass"
+        >{{ title }}</h2>
+        <p
+          v-if="body"
+          class="mt-[6px] m-0 text-ink-dim text-md leading-[1.5] max-w-[50ch]"
+        >{{ body }}</p>
       </header>
-      <footer class="cm__foot">
-        <button type="button" class="cm__btn cm__btn--ghost" @click="onCancel">
-          {{ cancelLabel }}
-        </button>
+      <footer
+        class="flex justify-end gap-2 px-[18px] py-[14px] border-t border-rule bg-bg-elev"
+      >
         <button
           type="button"
-          class="cm__btn"
-          :data-variant="variant"
-          @click="onConfirm"
-        >
-          {{ confirmLabel }}
-        </button>
+          class="inline-flex items-center h-[34px] px-4 rounded-1 text-xs uppercase tracking-[0.08em] font-semibold border border-border bg-surface text-ink-mute transition-colors hover:text-ink hover:border-border-hi"
+          @click="emit('cancel')"
+        >{{ cancelLabel }}</button>
+        <button
+          type="button"
+          class="inline-flex items-center h-[34px] px-4 rounded-1 text-xs uppercase tracking-[0.08em] font-semibold border transition-[filter] hover:brightness-[1.06]"
+          :class="confirmClass"
+          @click="emit('confirm')"
+        >{{ confirmLabel }}</button>
       </footer>
     </div>
   </Modal>
 </template>
-
-<style scoped>
-.cm {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.cm__head {
-  padding: 22px 22px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.cm__title {
-  margin: 0;
-  font-family: var(--font-tech, var(--font-mono));
-  font-weight: 700;
-  font-size: 22px;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-  text-transform: lowercase;
-}
-.cm__title[data-variant='danger'] {
-  color: var(--down);
-}
-.cm__title[data-variant='success'] {
-  color: var(--up);
-}
-.cm__body {
-  margin: 6px 0 0;
-  color: var(--ink-dim);
-  font-size: var(--fs-md);
-  line-height: 1.5;
-  max-width: 50ch;
-}
-
-.cm__foot {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 14px 18px;
-  border-top: 1px solid var(--rule);
-  background: var(--bg-elev);
-}
-
-.cm__btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 34px;
-  padding: 0 16px;
-  border-radius: var(--r-1);
-  font-size: var(--fs-xs);
-  letter-spacing: var(--tracking-mid);
-  text-transform: uppercase;
-  font-weight: 600;
-  border: 1px solid transparent;
-  transition:
-    filter var(--t-fast) var(--ease-out),
-    background var(--t-fast) var(--ease-out),
-    color var(--t-fast) var(--ease-out),
-    border-color var(--t-fast) var(--ease-out);
-}
-.cm__btn--ghost {
-  background: var(--surface);
-  color: var(--ink-mute);
-  border-color: var(--border);
-}
-.cm__btn--ghost:hover {
-  color: var(--ink);
-  border-color: var(--border-hi);
-}
-.cm__btn[data-variant='success'] {
-  background: var(--up);
-  color: #0b0a08;
-  border-color: var(--up);
-}
-.cm__btn[data-variant='danger'] {
-  background: var(--down);
-  color: #0b0a08;
-  border-color: var(--down);
-}
-.cm__btn[data-variant='neutral'] {
-  background: var(--accent);
-  color: var(--accent-ink);
-  border-color: var(--accent);
-}
-.cm__btn[data-variant]:hover {
-  filter: brightness(1.06);
-}
-</style>

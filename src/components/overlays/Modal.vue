@@ -32,7 +32,7 @@ onBeforeUnmount(() => {
     <Transition name="fade">
       <div
         v-if="open"
-        class="backdrop"
+        class="fixed inset-0 z-[200] bg-black/55 backdrop-blur-[3px]"
         role="presentation"
         @click="emit('close')"
       ></div>
@@ -40,7 +40,7 @@ onBeforeUnmount(() => {
     <Transition name="rise">
       <div
         v-if="open"
-        class="modal"
+        class="modal fixed left-1/2 top-[12vh] z-[210] w-[min(640px,92vw)] max-h-[76vh] -translate-x-1/2 bg-surface border border-border-hi rounded-1 flex flex-col overflow-hidden shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.02)_inset]"
         role="dialog"
         aria-modal="true"
         :aria-label="label"
@@ -53,32 +53,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(3px);
-  z-index: 200;
-}
-.modal {
-  position: fixed;
-  top: 12vh;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(640px, 92vw);
-  max-height: 76vh;
-  background: var(--surface);
-  border: 1px solid var(--border-hi);
-  border-radius: var(--r-1);
-  z-index: 210;
-  display: flex;
-  flex-direction: column;
-  box-shadow:
-    0 30px 80px -20px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
-  overflow: hidden;
-}
-
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 180ms var(--ease-out);

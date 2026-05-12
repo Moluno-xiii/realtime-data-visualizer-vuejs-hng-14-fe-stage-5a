@@ -47,12 +47,5 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <span class="num mono">{{ props.format(display) }}</span>
+  <span class="font-mono tabular-nums tracking-[-0.01em]">{{ props.format(display) }}</span>
 </template>
-
-<style scoped>
-.num {
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
-}
-</style>

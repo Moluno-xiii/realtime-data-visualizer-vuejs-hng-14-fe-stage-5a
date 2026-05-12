@@ -49,240 +49,90 @@ const rows = computed(() => {
 
 <template>
   <Modal :open="open" label="Manage watchlist" @close="emit('close')">
-    <header class="head">
-      <div class="head__titles">
+    <header class="flex items-start justify-between gap-3 px-5 pt-[18px] pb-2">
+      <div>
         <span class="eyebrow">Watchlist</span>
-        <h2 class="head__title">Manage symbols</h2>
-        <p class="head__sub mono">
+        <h2 class="mt-1 m-0 font-display italic text-[26px] leading-[1.05] text-ink">
+          Manage symbols
+        </h2>
+        <p class="mt-1 m-0 font-mono text-xs text-ink-mute">
           {{ symbols.length }} of {{ directory.length }} selected
-          <span v-if="!loaded" class="head__loading">· loading directory…</span>
+          <span v-if="!loaded" class="text-warn ml-1">· loading directory…</span>
         </p>
       </div>
-      <button type="button" class="head__reset" @click="reset">Reset</button>
+      <button
+        type="button"
+        class="text-xs uppercase tracking-[0.08em] text-ink-mute border border-border rounded-1 px-[10px] py-[6px] hover:text-ink hover:border-border-hi"
+        @click="reset"
+      >Reset</button>
     </header>
 
-    <div class="search">
-      <svg viewBox="0 0 16 16" width="13" height="13" class="search__icon">
+    <div
+      class="flex items-center gap-2 px-4 mx-4 mt-2 py-2 bg-bg-elev border border-border text-ink-mute focus-within:border-accent focus-within:text-ink"
+    >
+      <svg viewBox="0 0 16 16" width="13" height="13">
         <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4" fill="none" />
         <path d="m11 11 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
       </svg>
       <input
         v-model="q"
         type="search"
-        class="search__input"
+        class="flex-1 bg-transparent border-0 outline-0 text-ink text-sm min-w-0 placeholder:text-ink-faint"
         placeholder="Filter by symbol, base, or name…"
         aria-label="Filter symbols"
       />
     </div>
 
-    <ul class="list" role="list">
+    <ul class="list-none mt-3 px-2 pb-2 overflow-y-auto flex-1 min-h-0" role="list">
       <li v-for="r in rows" :key="r.info.symbol">
         <button
           type="button"
-          class="opt"
-          :class="{ 'opt--on': r.on }"
+          class="grid grid-cols-[18px_22px_auto_1fr_auto_auto] items-center gap-[10px] w-full px-3 py-[10px] rounded-1 text-left text-ink-dim transition-colors hover:bg-surface-hi hover:text-ink"
+          :class="r.on ? '!text-ink' : ''"
           :aria-pressed="r.on"
           @click="toggle(r.info.symbol)"
         >
-          <span class="opt__check" aria-hidden="true">
+          <span
+            class="w-4 h-4 border border-border-hi rounded-[3px] inline-flex items-center justify-center"
+            :class="r.on ? '!bg-accent !border-accent text-accent-ink' : 'text-accent-ink bg-transparent'"
+            aria-hidden="true"
+          >
             <svg v-if="r.on" viewBox="0 0 12 12" width="10" height="10">
-              <path d="M2 6.5L5 9.5L10 3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" />
+              <path
+                d="M2 6.5L5 9.5L10 3"
+                stroke="currentColor"
+                stroke-width="2"
+                fill="none"
+                stroke-linecap="round"
+              />
             </svg>
           </span>
-          <span class="opt__icon" aria-hidden="true">{{ r.info.icon }}</span>
-          <span class="opt__base">{{ r.info.base }}</span>
-          <span class="opt__name">{{ r.info.name }}</span>
-          <span v-if="r.ticker" class="opt__price mono">
+          <span class="font-mono text-ink-mute text-center" aria-hidden="true">{{ r.info.icon }}</span>
+          <span class="font-semibold tracking-[0.03em]">{{ r.info.base }}</span>
+          <span class="text-ink-mute text-sm whitespace-nowrap overflow-hidden text-ellipsis">{{ r.info.name }}</span>
+          <span v-if="r.ticker" class="text-sm text-ink font-mono">
             ${{ formatPrice(r.ticker.price) }}
           </span>
           <span
             v-if="r.ticker"
-            class="opt__chg mono"
+            class="text-xs font-mono min-w-[56px] text-right"
             :class="r.ticker.changePct24h >= 0 ? 'up' : 'down'"
-          >
-            {{ formatPct(r.ticker.changePct24h) }}
-          </span>
+          >{{ formatPct(r.ticker.changePct24h) }}</span>
         </button>
       </li>
-      <li v-if="!rows.length" class="empty">
-        No symbols match "{{ q }}".
-      </li>
+      <li
+        v-if="!rows.length"
+        class="px-3 py-8 text-center text-ink-mute text-sm"
+      >No symbols match "{{ q }}".</li>
     </ul>
 
-    <footer class="foot">
-      <span class="mono muted">Changes are saved automatically.</span>
-      <button type="button" class="foot__done" @click="emit('close')">Done</button>
+    <footer class="flex items-center justify-between px-4 py-3 border-t border-rule">
+      <span class="font-mono text-xs text-ink-faint">Changes are saved automatically.</span>
+      <button
+        type="button"
+        class="h-[30px] px-[14px] bg-accent text-accent-ink rounded-1 text-xs uppercase tracking-[0.08em] font-semibold hover:brightness-[1.06]"
+        @click="emit('close')"
+      >Done</button>
     </footer>
   </Modal>
 </template>
-
-<style scoped>
-.head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 18px 20px 8px;
-}
-.head__title {
-  margin: 4px 0 0;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 26px;
-  line-height: 1.05;
-  color: var(--ink);
-}
-.head__sub {
-  margin: 4px 0 0;
-  font-size: var(--fs-xs);
-  color: var(--ink-mute);
-}
-.head__loading {
-  color: var(--warn);
-  margin-left: 4px;
-}
-.head__reset {
-  font-size: var(--fs-xs);
-  letter-spacing: var(--tracking-mid);
-  text-transform: uppercase;
-  color: var(--ink-mute);
-  border: 1px solid var(--border);
-  border-radius: var(--r-1);
-  padding: 6px 10px;
-}
-.head__reset:hover {
-  color: var(--ink);
-  border-color: var(--border-hi);
-}
-
-.search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  margin: 8px 16px 0;
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  color: var(--ink-mute);
-}
-.search:focus-within {
-  border-color: var(--accent);
-  color: var(--ink);
-}
-.search__input {
-  flex: 1;
-  background: transparent;
-  border: 0;
-  outline: 0;
-  color: var(--ink);
-  font-size: var(--fs-sm);
-  min-width: 0;
-}
-.search__input::placeholder {
-  color: var(--ink-faint);
-}
-
-.list {
-  list-style: none;
-  margin: 12px 0 0;
-  padding: 0 8px 8px;
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-}
-
-.opt {
-  display: grid;
-  grid-template-columns: 18px 22px auto 1fr auto auto;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: var(--r-1);
-  text-align: left;
-  color: var(--ink-dim);
-  transition: background var(--t-fast) var(--ease-out);
-}
-.opt:hover {
-  background: var(--surface-hi);
-  color: var(--ink);
-}
-.opt--on {
-  color: var(--ink);
-}
-
-.opt__check {
-  width: 16px;
-  height: 16px;
-  border: 1px solid var(--border-hi);
-  border-radius: 3px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent-ink);
-  background: transparent;
-}
-.opt--on .opt__check {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.opt__icon {
-  font-family: var(--font-mono);
-  color: var(--ink-mute);
-  text-align: center;
-}
-.opt__base {
-  font-weight: 600;
-  letter-spacing: 0.03em;
-}
-.opt__name {
-  color: var(--ink-mute);
-  font-size: var(--fs-sm);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.opt__price {
-  font-size: var(--fs-sm);
-  color: var(--ink);
-}
-.opt__chg {
-  font-size: var(--fs-xs);
-  min-width: 56px;
-  text-align: right;
-}
-
-.empty {
-  padding: 32px 12px;
-  text-align: center;
-  color: var(--ink-mute);
-  font-size: var(--fs-sm);
-}
-
-.foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-top: 1px solid var(--rule);
-}
-.muted {
-  color: var(--ink-faint);
-  font-size: var(--fs-xs);
-}
-.foot__done {
-  height: 30px;
-  padding: 0 14px;
-  background: var(--accent);
-  color: var(--accent-ink);
-  border-radius: var(--r-1);
-  font-size: var(--fs-xs);
-  letter-spacing: var(--tracking-mid);
-  text-transform: uppercase;
-  font-weight: 600;
-}
-.foot__done:hover {
-  filter: brightness(1.06);
-}
-</style>

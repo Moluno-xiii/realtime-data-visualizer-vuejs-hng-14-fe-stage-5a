@@ -228,16 +228,18 @@ watch(rows, () => {
 
 <template>
   <Modal :open="open" label="Switch market" @close="emit('close')">
-    <div class="ms" @keydown="onKey">
-      <div class="ms__head">
+    <div class="flex flex-col min-h-0 flex-1" @keydown="onKey">
+      <div class="flex items-center justify-between px-[18px] pt-[14px] pb-[6px]">
         <span class="eyebrow">Switch market</span>
-        <span class="ms__count mono">
+        <span class="font-mono text-xs text-ink-mute">
           {{ matched.length }} of {{ directory.length }}
-          <span v-if="!loaded" class="ms__loading">· loading…</span>
+          <span v-if="!loaded" class="text-warn ml-1">· loading…</span>
         </span>
       </div>
-      <div class="ms__search">
-        <span class="ms__icon" aria-hidden="true">
+      <div
+        class="flex items-center gap-[10px] px-[14px] py-[10px] mx-[14px] mt-1 bg-bg-elev border border-border rounded-1 text-ink-mute focus-within:border-accent focus-within:text-ink"
+      >
+        <span aria-hidden="true">
           <svg viewBox="0 0 16 16" width="14" height="14">
             <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4" fill="none" />
             <path d="m11 11 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
@@ -247,16 +249,16 @@ watch(rows, () => {
           id="ms-input"
           v-model="q"
           type="text"
-          class="ms__input"
+          class="flex-1 bg-transparent border-0 outline-0 text-ink text-md font-body min-w-0 placeholder:text-ink-faint"
           placeholder="Search a pair — try BTC, ETH, SOL…"
           aria-label="Search markets"
           autocomplete="off"
           spellcheck="false"
         />
-        <span class="ms__esc">esc</span>
+        <span class="font-mono text-[10px] tracking-[0.06em] text-ink-mute border border-border rounded-[3px] px-[6px] py-[2px] bg-surface">esc</span>
       </div>
 
-      <ul class="ms__list" role="listbox">
+      <ul class="ms-list list-none mt-2 overflow-y-auto flex-1 min-h-0" role="listbox">
         <li
           v-for="(r, i) in rows"
           :key="r.info.symbol"
@@ -265,230 +267,87 @@ watch(rows, () => {
           <button
             type="button"
             role="option"
-            class="ms__opt"
-            :class="{
-              'ms__opt--active': idx === i,
-              'ms__opt--current': r.info.symbol === current,
-            }"
+            class="ms-row flex items-center gap-[10px] w-full rounded-[2px] text-left text-ink-dim transition-colors hover:bg-surface-hi hover:text-ink min-w-0"
+            :class="[
+              idx === i
+                ? 'bg-surface-hi text-ink ring-1 ring-inset ring-accent'
+                : '',
+              r.info.symbol === current ? 'bg-accent-soft' : '',
+            ]"
             :aria-selected="idx === i"
             @click="pick(r.info.symbol)"
             @mouseenter="idx = i"
           >
-            <span class="ms__opt-icon" aria-hidden="true">{{ r.info.icon }}</span>
-            <span class="ms__opt-base">{{ r.info.base }}</span>
-            <span class="ms__opt-quote">/ {{ r.info.quote }}</span>
-            <span class="ms__opt-name">{{ r.info.name }}</span>
-            <span v-if="r.on" class="ms__pin" title="On watchlist">●</span>
-            <span v-if="r.ticker" class="ms__opt-price mono">
+            <span class="font-mono text-ink-mute text-center shrink-0" aria-hidden="true">{{ r.info.icon }}</span>
+            <span class="font-tech font-bold tracking-[0.02em] shrink-0">{{ r.info.base }}</span>
+            <span class="text-ink-faint text-sm shrink-0">/ {{ r.info.quote }}</span>
+            <span class="ms-name text-ink-mute text-sm whitespace-nowrap overflow-hidden text-ellipsis flex-1 min-w-0">{{ r.info.name }}</span>
+            <span v-if="r.on" class="ms-pin text-accent text-[8px] shrink-0" title="On watchlist">●</span>
+            <span v-if="r.ticker" class="text-sm text-ink font-mono shrink-0">
               ${{ formatPrice(r.ticker.price) }}
             </span>
             <span
               v-if="r.ticker"
-              class="ms__opt-chg mono"
+              class="text-xs font-mono min-w-[56px] text-right shrink-0"
               :class="r.ticker.changePct24h >= 0 ? 'up' : 'down'"
             >{{ formatPct(r.ticker.changePct24h) }}</span>
-            <span v-if="r.info.symbol === current" class="ms__here">current</span>
+            <span
+              v-if="r.info.symbol === current"
+              class="inline-block whitespace-nowrap font-mono text-[9px] leading-none px-2 py-1 rounded-pill bg-accent text-accent-ink tracking-[0.06em] uppercase font-semibold shrink-0"
+            >current</span>
           </button>
         </li>
         <li
           v-if="!rows.length && (remoteSearching || directoryLoading)"
-          class="ms__empty ms__empty--loading"
+          class="flex items-center justify-center gap-2 py-[26px] text-xs uppercase tracking-[0.08em] text-ink-mute"
         >
-          <span class="ms__spinner" aria-hidden="true"></span>
-          <span class="mono">Searching Binance for "{{ q }}"…</span>
+          <span class="ms-spinner w-3 h-3 rounded-full border-[1.5px] border-border border-t-accent" aria-hidden="true"></span>
+          <span class="font-mono">Searching Binance for "{{ q }}"…</span>
         </li>
-        <li v-else-if="!rows.length" class="ms__empty">
-          <span class="ms__empty-title">No symbols match "{{ q }}"</span>
-          <span class="ms__empty-hint">Not listed on Binance spot.</span>
+        <li
+          v-else-if="!rows.length"
+          class="flex flex-col items-center gap-[6px] py-[26px] text-center text-ink-mute text-sm"
+        >
+          <span class="text-ink-dim">No symbols match "{{ q }}"</span>
+          <span class="font-mono text-xs text-ink-faint uppercase tracking-[0.08em]">Not listed on Binance spot.</span>
         </li>
         <li
           v-if="rows.length && rows.length < matched.length"
           ref="sentinel"
-          class="ms__sentinel"
+          class="py-[14px] text-center font-mono text-xs uppercase tracking-[0.08em] text-ink-faint"
         >
           loading more · {{ rows.length }} of {{ matched.length }}
         </li>
       </ul>
 
-      <footer class="ms__foot">
-        <span class="ms__legend"><kbd>↑↓</kbd> navigate</span>
-        <span class="ms__legend"><kbd>↵</kbd> open</span>
-        <span class="ms__legend"><kbd>esc</kbd> close</span>
+      <footer class="flex items-center gap-[14px] px-[14px] py-[10px] border-t border-rule bg-bg-elev">
+        <span class="text-xs uppercase tracking-[0.08em] text-ink-faint inline-flex items-center gap-[6px]">
+          <kbd class="font-mono text-[10px] py-[1px] px-[5px] border border-border rounded-[3px] text-ink-mute bg-surface">↑↓</kbd>
+          navigate
+        </span>
+        <span class="text-xs uppercase tracking-[0.08em] text-ink-faint inline-flex items-center gap-[6px]">
+          <kbd class="font-mono text-[10px] py-[1px] px-[5px] border border-border rounded-[3px] text-ink-mute bg-surface">↵</kbd>
+          open
+        </span>
+        <span class="text-xs uppercase tracking-[0.08em] text-ink-faint inline-flex items-center gap-[6px]">
+          <kbd class="font-mono text-[10px] py-[1px] px-[5px] border border-border rounded-[3px] text-ink-mute bg-surface">esc</kbd>
+          close
+        </span>
       </footer>
     </div>
   </Modal>
 </template>
 
+
 <style scoped>
-.ms {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  flex: 1;
+.ms-list {
+  padding: 8px 16px 16px;
 }
-.ms__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 18px 6px;
+.ms-row {
+  padding: 14px 20px;
+  margin: 2px 0;
 }
-.ms__count {
-  font-size: var(--fs-xs);
-  color: var(--ink-mute);
-}
-.ms__loading {
-  color: var(--warn);
-  margin-left: 4px;
-}
-
-.ms__search {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  margin: 4px 14px 0;
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--r-1);
-  color: var(--ink-mute);
-}
-.ms__search:focus-within {
-  border-color: var(--accent);
-  color: var(--ink);
-}
-.ms__input {
-  flex: 1;
-  background: transparent;
-  border: 0;
-  outline: 0;
-  color: var(--ink);
-  font-size: var(--fs-md);
-  font-family: var(--font-body);
-  min-width: 0;
-}
-.ms__input::placeholder {
-  color: var(--ink-faint);
-}
-.ms__esc {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  color: var(--ink-mute);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 2px 6px;
-  background: var(--surface);
-}
-
-.ms__list {
-  list-style: none;
-  margin: 8px 0 0;
-  padding: 4px 8px 8px;
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-}
-
-.ms__opt {
-  display: grid;
-  grid-template-columns: 18px auto auto 1fr auto auto auto;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 9px 10px;
-  border-radius: 2px;
-  text-align: left;
-  color: var(--ink-dim);
-  transition: background var(--t-fast) var(--ease-out);
-}
-.ms__opt--active {
-  background: var(--surface-hi);
-  color: var(--ink);
-  outline: 1px solid var(--accent);
-  outline-offset: -1px;
-}
-.ms__opt--current {
-  background: var(--accent-soft);
-}
-.ms__opt-icon {
-  font-family: var(--font-mono);
-  color: var(--ink-mute);
-  text-align: center;
-}
-.ms__opt-base {
-  font-weight: 700;
-  font-family: var(--font-tech, var(--font-mono));
-  letter-spacing: 0.02em;
-}
-.ms__opt-quote {
-  color: var(--ink-faint);
-  font-size: var(--fs-sm);
-}
-.ms__opt-name {
-  color: var(--ink-mute);
-  font-size: var(--fs-sm);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.ms__pin {
-  color: var(--accent);
-  font-size: 8px;
-}
-.ms__opt-price {
-  font-size: var(--fs-sm);
-  color: var(--ink);
-}
-.ms__opt-chg {
-  font-size: var(--fs-xs);
-  min-width: 56px;
-  text-align: right;
-}
-.ms__here {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: var(--accent);
-  color: var(--accent-ink);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.ms__empty {
-  padding: 26px 12px;
-  text-align: center;
-  color: var(--ink-mute);
-  font-size: var(--fs-sm);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-.ms__empty-title {
-  color: var(--ink-dim);
-}
-.ms__empty-hint {
-  font-family: var(--font-mono);
-  font-size: var(--fs-xs);
-  color: var(--ink-faint);
-  letter-spacing: var(--tracking-mid);
-  text-transform: uppercase;
-}
-.ms__empty--loading {
-  flex-direction: row;
-  justify-content: center;
-  color: var(--ink-mute);
-  letter-spacing: var(--tracking-mid);
-  text-transform: uppercase;
-  font-size: var(--fs-xs);
-}
-.ms__spinner {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 1.5px solid var(--border);
-  border-top-color: var(--accent);
+.ms-spinner {
   animation: ms-spin 0.8s linear infinite;
 }
 @keyframes ms-spin {
@@ -496,50 +355,9 @@ watch(rows, () => {
     transform: rotate(360deg);
   }
 }
-.ms__sentinel {
-  padding: 14px 12px;
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: var(--fs-xs);
-  letter-spacing: var(--tracking-mid);
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-.ms__foot {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 10px 14px;
-  border-top: 1px solid var(--rule);
-  background: var(--bg-elev);
-}
-.ms__legend {
-  font-size: var(--fs-xs);
-  letter-spacing: var(--tracking-mid);
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.ms__legend kbd {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  padding: 1px 5px;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  color: var(--ink-mute);
-  background: var(--surface);
-}
-
 @media (max-width: 540px) {
-  .ms__opt {
-    grid-template-columns: 18px auto auto 1fr auto;
-    gap: 8px;
-  }
-  .ms__opt-name,
-  .ms__pin {
+  .ms-name,
+  .ms-pin {
     display: none;
   }
 }

@@ -5,12 +5,12 @@ const { theme, toggle } = useTheme()
 
 <template>
   <button
-    class="tt"
     type="button"
+    class="w-8 h-8 inline-flex items-center justify-center border border-border rounded-1 bg-surface text-ink-dim transition-colors hover:text-ink hover:border-border-hi hover:bg-surface-hi"
     :aria-label="`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`"
     @click="toggle"
   >
-    <span class="tt__icon" aria-hidden="true">
+    <span aria-hidden="true">
       <svg v-if="theme === 'dark'" viewBox="0 0 16 16" width="14" height="14">
         <path
           d="M11 8.5A4.5 4.5 0 0 1 6.5 4c0-.7.16-1.36.44-1.95A6 6 0 1 0 13.95 9.06 4.5 4.5 0 0 1 11 8.5Z"
@@ -27,26 +27,3 @@ const { theme, toggle } = useTheme()
     </span>
   </button>
 </template>
-
-<style scoped>
-.tt {
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border);
-  border-radius: var(--r-1);
-  background: var(--surface);
-  color: var(--ink-dim);
-  transition:
-    color var(--t-fast) var(--ease-out),
-    border-color var(--t-fast) var(--ease-out),
-    background var(--t-fast) var(--ease-out);
-}
-.tt:hover {
-  color: var(--ink);
-  border-color: var(--border-hi);
-  background: var(--surface-hi);
-}
-</style>

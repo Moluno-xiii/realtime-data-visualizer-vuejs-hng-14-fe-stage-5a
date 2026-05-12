@@ -20,22 +20,36 @@ const items = computed(() => {
 </script>
 
 <template>
-  <div class="tape" role="region" aria-label="Live ticker tape">
-    <div class="tape__brand">
-      <span class="dot dot--live" aria-hidden="true"></span>
+  <div
+    class="flex items-center gap-4 h-[var(--tape-h)] border-b border-rule bg-gradient-to-b from-bg-elev to-bg relative overflow-hidden flex-none"
+    role="region"
+    aria-label="Live ticker tape"
+  >
+    <div
+      class="flex items-center gap-2 px-4 h-full border-r border-rule bg-bg flex-none z-[2]"
+    >
+      <span
+        class="w-2 h-2 rounded-full bg-accent text-accent shadow-[0_0_8px_var(--accent)] animate-pulse-dot"
+        aria-hidden="true"
+      ></span>
       <span class="eyebrow">LIVE&nbsp;FEED</span>
     </div>
-    <div class="tape__track" aria-hidden="false">
-      <div class="tape__rail">
-        <div v-for="(t, i) in items" :key="`${t.symbol}-${i}`" class="tape__item">
-          <span class="tape__sym">{{ t.info.icon }} {{ t.info.base }}</span>
-          <span class="tape__price mono">{{ formatPrice(t.price) }}</span>
+    <div class="tape-track flex-1 overflow-hidden">
+      <div class="tape-rail flex items-center w-max h-full hover:[animation-play-state:paused]">
+        <div
+          v-for="(t, i) in items"
+          :key="`${t.symbol}-${i}`"
+          class="inline-flex items-baseline gap-[10px] px-[14px] text-sm text-ink-dim whitespace-nowrap"
+        >
+          <span class="font-semibold uppercase tracking-[0.08em] text-ink">
+            {{ t.info.icon }} {{ t.info.base }}
+          </span>
+          <span class="text-sm text-ink font-mono">{{ formatPrice(t.price) }}</span>
           <span
-            class="tape__chg mono"
+            class="text-xs font-mono"
             :class="t.changePct24h >= 0 ? 'up' : 'down'"
-            >{{ formatPct(t.changePct24h) }}</span
-          >
-          <span class="tape__sep" aria-hidden="true">·</span>
+          >{{ formatPct(t.changePct24h) }}</span>
+          <span class="text-ink-faint ml-1" aria-hidden="true">·</span>
         </div>
       </div>
     </div>
@@ -43,44 +57,7 @@ const items = computed(() => {
 </template>
 
 <style scoped>
-.tape {
-  display: flex;
-  align-items: center;
-  gap: var(--s-4);
-  height: var(--tape-h);
-  border-bottom: 1px solid var(--rule);
-  background:
-    linear-gradient(180deg, var(--bg-elev) 0%, var(--bg) 100%);
-  position: relative;
-  overflow: hidden;
-  flex: 0 0 auto;
-}
-
-.tape__brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 var(--s-4);
-  height: 100%;
-  border-right: 1px solid var(--rule);
-  background: var(--bg);
-  flex: 0 0 auto;
-  z-index: 2;
-}
-
-.dot--live {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
-  animation: pulse-dot 1.6s ease-in-out infinite;
-}
-
-.tape__track {
-  flex: 1;
-  overflow: hidden;
+.tape-track {
   mask-image: linear-gradient(
     90deg,
     transparent 0,
@@ -89,50 +66,9 @@ const items = computed(() => {
     transparent 100%
   );
 }
-
-.tape__rail {
-  display: flex;
-  align-items: center;
-  width: max-content;
-  height: 100%;
+.tape-rail {
   animation: tape-scroll 90s linear infinite;
 }
-
-.tape__rail:hover {
-  animation-play-state: paused;
-}
-
-.tape__item {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 10px;
-  padding: 0 14px;
-  font-size: var(--fs-sm);
-  color: var(--ink-dim);
-  white-space: nowrap;
-}
-
-.tape__sym {
-  font-weight: 600;
-  letter-spacing: var(--tracking-mid);
-  text-transform: uppercase;
-  color: var(--ink);
-}
-
-.tape__price {
-  font-size: var(--fs-sm);
-  color: var(--ink);
-}
-
-.tape__chg {
-  font-size: var(--fs-xs);
-}
-
-.tape__sep {
-  color: var(--ink-faint);
-  margin-left: 4px;
-}
-
 @keyframes tape-scroll {
   from {
     transform: translate3d(0, 0, 0);
