@@ -16,4 +16,22 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  server: {
+    host: true,
+    allowedHosts: [
+      'italicize-dynamic-harness.ngrok-free.dev',
+      '.ngrok-free.dev',
+      '.ngrok.io',
+      '.ngrok.app',
+    ],
+  },
+  preview: {
+    host: true,
+    allowedHosts: [
+      'italicize-dynamic-harness.ngrok-free.dev',
+      '.ngrok-free.dev',
+      '.ngrok.io',
+      '.ngrok.app',
+    ],
+  },
 })

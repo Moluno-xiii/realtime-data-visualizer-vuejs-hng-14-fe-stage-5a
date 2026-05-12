@@ -95,12 +95,19 @@ export class BinanceClient extends BaseClient {
       this.emit({ kind: 'status', state: 'live' })
       this.heartbeat = window.setInterval(() => {
         if (!this.opened) return
+        if (
+          typeof document !== 'undefined' &&
+          document.visibilityState === 'hidden'
+        ) {
+          this.lastFrameAt = performance.now()
+          return
+        }
         const stale = performance.now() - this.lastFrameAt
-        if (stale > 30_000) {
+        if (stale > 45_000) {
           this.emit({
             kind: 'status',
             state: 'reconnecting',
-            reason: 'no frames for 30s',
+            reason: 'no frames for 45s',
           })
           try {
             ws.close()
@@ -134,11 +141,14 @@ export class BinanceClient extends BaseClient {
     this.clearTimers()
     const delay = backoffMs(this.attempt, RECONNECT_CAP)
     this.attempt++
+    const offline = this.attempt >= 4
     this.emit({
       kind: 'status',
-      state: 'reconnecting',
+      state: offline ? 'offline' : 'reconnecting',
       attempt: this.attempt,
-      reason: `retry in ${Math.round(delay)}ms`,
+      reason: offline
+        ? 'binance unreachable'
+        : `retry in ${Math.round(delay)}ms`,
     })
     this.reconnectTimer = window.setTimeout(() => this.connect(), delay)
   }
