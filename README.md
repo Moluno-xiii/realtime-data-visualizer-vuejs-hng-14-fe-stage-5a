@@ -15,6 +15,7 @@ A production-styled real-time crypto markets dashboard built for **HNG Stage 5A*
 - **Styling:** Tailwind v4 + design tokens (CSS vars) + scoped component styles
 - **Validation:** Zod (every inbound WS frame is schema-checked)
 - **Utilities:** `@vueuse/core`
+- **Virtualization:** `@tanstack/vue-virtual` (windowed rendering for the activity feed)
 - **Lint/Format:** ESLint (flat config) + oxlint + Prettier
 - **Package manager:** pnpm
 
@@ -51,17 +52,18 @@ src/
 ├── views/                  one component per route
 ├── components/
 │   ├── cards/              MetricCard, Sparkline, AnimatedNumber
-│   ├── charts/             PriceChart, VolumeBarChart, CandlestickChart
+│   ├── charts/             PriceChart, VolumeBarChart, CandlestickChart, MarketHeatmap
 │   ├── controls/           PauseResume, ThemeToggle, StatusPill, SegmentedControl
 │   ├── feed/               ActivityFeed, ActivityRow
 │   ├── overlays/           CommandPalette, SymbolPicker, MarketSwitcher, Modal
 │   ├── layout/             AppShell, TopBar, SideRail, TickerTape, MobileDrawer
 │   ├── landing/            HeroPreview
 │   └── feedback/           Skeleton, EmptyState
-├── composables/            useStream, useChartData, useRafBatch, usePause,
-│                           useWatchlist, useTheme, useDataSource, useDensity,
-│                           useFocusedSymbol, useHeartbeat, useOverlays,
-│                           useMobileDrawer, useRecentSymbols
+├── composables/            useStream, useChartData, useCompareSeries,
+│                           useRafBatch, usePause, useWatchlist, useTheme,
+│                           useDataSource, useDensity, useFocusedSymbol,
+│                           useHeartbeat, useOverlays, useMobileDrawer,
+│                           useRecentSymbols
 ├── stores/                 streamStore, marketStore, klineStore,
 │                           symbolsStore, activityStore
 ├── services/stream/        BaseClient, BinanceClient, BinanceRest,
@@ -115,6 +117,7 @@ Real-time dashboards live or die on frame budget. TAPE applies several layers:
 6. **Lazy routes + code splitting.** Every view is `() => import(...)` so first paint isn't blocked by the candlestick chart on `/markets/:symbol`.
 7. **Pause-aware drain.** When the user pauses (Space bar or button), the RAF drain function returns early; frames keep arriving (so latency/heartbeat stay accurate) but the UI freezes cleanly without snapshot drift on resume.
 8. **Cleanup discipline.** `useStream` ref-counts attach/detach so the socket and timers tear down deterministically when no view needs them.
+9. **Virtualized activity feed.** The `ActivityFeed` mounts only the visible slice of events using `@tanstack/vue-virtual` (`useVirtualizer` with a fixed 40px row height and 8-row overscan). Whether the feed holds 500 events (the current cap) or 50,000, only ~15–25 `<li>`s exist in the DOM at any time. The feed also pins the scroll to the top when the user is near it, otherwise compensates `scrollTop` by `delta * rowHeight` on prepend so reading history doesn't jump as new events arrive. Filter changes (query, severity) snap the scroller back to the top.
 
 ## UX details
 
@@ -124,6 +127,8 @@ Real-time dashboards live or die on frame budget. TAPE applies several layers:
 - **Theme toggle** (light/dark/system), persisted to `localStorage`.
 - **Status pill** with live/reconnecting/offline/paused states and an animated latency badge.
 - **Offline indicator** on the chart interface when the WS drops past the retry threshold.
+- **Multi-symbol compare** on the dashboard chart: toggle watchlist symbols on/off as overlay series; the chart auto-switches to percent-change normalization so BTC at $100k and SOL at $200 are visually comparable. Each series gets its own color and a click-to-hide legend entry.
+- **Market heatmap** (Finviz-style treemap) on the dashboard, sized by 24h volume and colored by 24h % change (red → flat surface → green, linearly interpolated). Clicking a tile focuses that symbol in the main chart.
 - **Responsive shell:** desktop side rail collapses to a mobile drawer below 1024px, search bar to an icon below 1200px.
 - **Animated numbers, sparklines, ticker tape:** small touches to make the dashboard feel alive.
 
@@ -143,6 +148,7 @@ Real-time dashboards live or die on frame budget. TAPE applies several layers:
 - **800ms sparkline throttle:** trades visual density on hot symbols for a stable render budget. Configurable in `marketStore.ts`.
 - **No Web Worker:** Zod parsing + RAF batching keeps the main thread well under 16ms per frame even at >50 msgs/sec; a worker would add complexity without measurable gain at current load.
 - **Synthetic feed is opt-in only:** prevents users from accidentally evaluating the UI against fake data when live fails. Failure is surfaced explicitly via the status pill and offline indicator.
+- **TanStack Virtual over TanStack Query for the feed:** the activity feed is an in-memory ring buffer (no server pagination), so the problem is rendering weight, not fetching. Virtual solves that directly with windowed rendering. Query would only help if we ever expose paginated history beyond the in-memory cap.
 
 ## Deployment
 
