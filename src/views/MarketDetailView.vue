@@ -68,10 +68,10 @@ const spark = computed(() => {
 const statRows = computed(() => {
   const t = ticker.value
   return [
-    { label: '24h High', value: t ? '$' + formatPrice(t.high24h) : '—' },
-    { label: '24h Low', value: t ? '$' + formatPrice(t.low24h) : '—' },
-    { label: '24h Vol', value: t ? '$' + formatCompact(t.volume24h) : '—' },
-    { label: 'Last tick', value: t ? formatTime(t.lastUpdate) : '—' },
+    { label: '24h High', value: t ? '$' + formatPrice(t.high24h) : '-' },
+    { label: '24h Low', value: t ? '$' + formatPrice(t.low24h) : '-' },
+    { label: '24h Vol', value: t ? '$' + formatCompact(t.volume24h) : '-' },
+    { label: 'Last tick', value: t ? formatTime(t.lastUpdate) : '-' },
   ]
 })
 </script>

@@ -33,7 +33,7 @@ const CAPABILITIES = [
   {
     eyebrow: '01',
     title: 'Live charts',
-    desc: 'Line, area, bar, candle — all Canvas-rendered and tuned for streaming updates.',
+    desc: 'Line, area, bar, candle: all Canvas-rendered and tuned for streaming updates.',
   },
   {
     eyebrow: '02',
@@ -119,7 +119,7 @@ const PILLARS = [
             <span class="rise text-accent" style="--d: 460ms">.</span>
           </h1>
           <p class="rise m-0 text-ink-dim text-[clamp(15px,1.4vw,18px)] leading-[1.55] max-w-[56ch]" style="--d: 600ms">
-            A streaming terminal for retail traders who want pro-grade signal —
+            A streaming terminal for retail traders who want pro-grade signal,
             without the seven-monitor setup. Watch price, momentum, and the order
             book breathe in real time.
           </p>
@@ -165,7 +165,7 @@ const PILLARS = [
           <span>, at sixty frames a second.”</span>
         </p>
         <p class="mt-[22px] mx-auto text-center uppercase tracking-[0.08em] text-[11px] text-ink-mute font-mono">
-          — TAPE · v0.1 · synthetic feed
+          TAPE · v0.1 · synthetic feed
         </p>
       </section>
 

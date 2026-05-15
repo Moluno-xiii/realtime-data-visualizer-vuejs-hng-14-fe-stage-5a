@@ -7,7 +7,7 @@ const router = createRouter({
       path: '/',
       name: 'landing',
       component: () => import('@/views/LandingView.vue'),
-      meta: { title: 'TAPE — live markets terminal', layout: 'landing' },
+      meta: { title: 'TAPE: live markets terminal', layout: 'landing' },
     },
     {
       path: '/dashboard',
@@ -33,7 +33,12 @@ const router = createRouter({
       component: () => import('@/views/SettingsView.vue'),
       meta: { title: 'Settings' },
     },
-    { path: '/:pathMatch(.*)*', redirect: '/' },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('@/views/NotFoundView.vue'),
+      meta: { title: 'Not found', layout: 'landing' },
+    },
   ],
   scrollBehavior() {
     return { top: 0 }
@@ -43,9 +48,9 @@ const router = createRouter({
 router.afterEach((to) => {
   const t = (to.meta?.title as string) || ''
   if (to.meta?.layout === 'landing') {
-    document.title = 'TAPE — live markets terminal'
+    document.title = 'TAPE: live markets terminal'
   } else {
-    document.title = t ? `TAPE · ${t}` : 'TAPE — live markets terminal'
+    document.title = t ? `TAPE · ${t}` : 'TAPE: live markets terminal'
   }
 })
 
