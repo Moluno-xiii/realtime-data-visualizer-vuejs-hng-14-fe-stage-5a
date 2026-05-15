@@ -71,7 +71,9 @@ export class StreamService {
         market.seedSeries(symbol, candlesToSeries(candles))
       }
     } catch (err) {
-      console.warn(`[stream] ensureKlines ${symbol}/${interval} failed`, err)
+      if (import.meta.env.DEV) {
+        console.warn(`[stream] ensureKlines ${symbol}/${interval} failed`, err)
+      }
     }
   }
 
@@ -136,7 +138,9 @@ export class StreamService {
       if (token !== this.seedToken) return
       market.seedTickers(tickers)
     } catch (err) {
-      console.warn('[stream] seed tickers failed', err)
+      if (import.meta.env.DEV) {
+        console.warn('[stream] seed tickers failed', err)
+      }
     }
     await Promise.all(
       symbols.map(async (s) => {
@@ -146,7 +150,9 @@ export class StreamService {
           klines.seed(s, KLINE_INTERVAL, candles)
           market.seedSeries(s, candlesToSeries(candles))
         } catch (err) {
-          console.warn(`[stream] seed klines ${s} failed`, err)
+          if (import.meta.env.DEV) {
+            console.warn(`[stream] seed klines ${s} failed`, err)
+          }
         }
       }),
     )

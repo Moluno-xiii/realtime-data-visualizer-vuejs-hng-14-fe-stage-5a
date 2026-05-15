@@ -7,6 +7,7 @@ import MetricCardSkeleton from '@/components/cards/MetricCardSkeleton.vue'
 import PriceChart from '@/components/charts/PriceChart.vue'
 import CandlestickChart from '@/components/charts/CandlestickChart.vue'
 import VolumeBarChart from '@/components/charts/VolumeBarChart.vue'
+import MarketHeatmap, { type HeatTile } from '@/components/charts/MarketHeatmap.vue'
 import ActivityFeed from '@/components/feed/ActivityFeed.vue'
 import SelectMenu from '@/components/controls/SelectMenu.vue'
 import PauseResume from '@/components/controls/PauseResume.vue'
@@ -14,7 +15,9 @@ import { usePause } from '@/composables/usePause'
 import { useWatchlist } from '@/composables/useWatchlist'
 import { useFocusedSymbol } from '@/composables/useFocusedSymbol'
 import { useChartData } from '@/composables/useChartData'
+import { useCompareSeries } from '@/composables/useCompareSeries'
 import { useOverlays } from '@/composables/useOverlays'
+import { compareColor } from '@/charts/echartsBootstrap'
 import EmptyState from '@/components/feedback/EmptyState.vue'
 import { useMarketStore } from '@/stores/marketStore'
 import { useStreamStore } from '@/stores/streamStore'
@@ -33,6 +36,7 @@ type KindOption = { value: ChartKind; label: string; hint: string }
 
 const range = ref<TimeRange>('live')
 const kind = ref<ChartKind>('area')
+const compareSet = ref<Set<string>>(new Set())
 const { paused, toggle: togglePause } = usePause()
 const { symbols: watchlistSymbols } = useWatchlist()
 const { focus, setFocus } = useFocusedSymbol()
@@ -74,6 +78,43 @@ const KIND_OPTS: { value: ChartKind; label: string; hint: string }[] = [
 const { series: heroSeries, candles: focusCandles } = useChartData(focus, range)
 const focusInfo = computed(() => symbolsStore.lookup(focus.value))
 const focusTicker = computed(() => tickers.value[focus.value])
+
+const compareCapable = computed(() => kind.value !== 'candle' && kind.value !== 'bar')
+
+const compareSymbols = computed(() => {
+  if (!compareCapable.value) return []
+  return [...compareSet.value].filter((s) => s !== focus.value)
+})
+
+const compareCandidates = computed(() =>
+  watchlistSymbols.value.filter((s) => s !== focus.value).slice(0, 8),
+)
+
+const { compareSeries } = useCompareSeries(compareSymbols, range)
+
+const overlays = computed(() =>
+  compareSeries.value.map((c) => ({
+    symbol: c.symbol,
+    label: symbolsStore.lookup(c.symbol).base,
+    series: c.series,
+  })),
+)
+
+function toggleCompare(sym: string) {
+  const next = new Set(compareSet.value)
+  if (next.has(sym)) next.delete(sym)
+  else next.add(sym)
+  compareSet.value = next
+}
+
+function clearCompare() {
+  if (compareSet.value.size) compareSet.value = new Set()
+}
+
+function chipColor(sym: string): string {
+  const idx = compareSymbols.value.indexOf(sym)
+  return idx >= 0 ? compareColor(idx) : 'var(--ink-faint)'
+}
 
 const subscribedSymbols = computed(() => {
   const set = new Set<string>(['BTCUSDT'])
@@ -124,6 +165,22 @@ const symbolInfo = (sym: string) => symbolsStore.lookup(sym)
 const totalVolume = computed(() =>
   Object.values(tickers.value).reduce((s, t) => s + t.volume24h, 0),
 )
+
+const heatTiles = computed<HeatTile[]>(() => {
+  const out: HeatTile[] = []
+  for (const sym of subscribedSymbols.value) {
+    const t = tickers.value[sym]
+    if (!t) continue
+    out.push({
+      symbol: sym,
+      label: symbolsStore.lookup(sym).base,
+      price: t.price,
+      changePct: t.changePct24h,
+      volume: t.volume24h,
+    })
+  }
+  return out.sort((a, b) => b.volume - a.volume)
+})
 
 const watched = computed(() => new Set(watchlistSymbols.value))
 const recentActivity = computed(() =>
@@ -301,12 +358,53 @@ const recentActivity = computed(() =>
 
           <PauseResume :paused="paused" @update:paused="togglePause" />
         </template>
+        <div
+          v-if="compareCapable && compareCandidates.length"
+          class="compare-row flex items-center gap-2 px-1 pb-2 flex-wrap"
+          role="group"
+          aria-label="Compare watchlist symbols"
+        >
+          <span class="text-[10px] uppercase tracking-[0.18em] text-ink-faint font-mono">
+            Compare
+          </span>
+          <button
+            v-for="sym in compareCandidates"
+            :key="sym"
+            type="button"
+            class="compare-chip inline-flex items-center gap-[6px] h-[24px] px-[10px] border border-border rounded-pill bg-surface text-ink-mute text-[11px] font-mono uppercase tracking-[0.06em] transition-colors hover:text-ink-dim hover:border-border-hi"
+            :class="compareSet.has(sym) ? 'is-on' : ''"
+            :aria-pressed="compareSet.has(sym)"
+            @click="toggleCompare(sym)"
+          >
+            <span
+              class="w-[6px] h-[6px] rounded-full inline-block"
+              :style="{ background: chipColor(sym) }"
+              aria-hidden="true"
+            ></span>
+            {{ symbolInfo(sym).base }}
+          </button>
+          <button
+            v-if="compareSet.size"
+            type="button"
+            class="text-[10px] uppercase tracking-[0.12em] text-ink-faint hover:text-ink-dim transition-colors"
+            @click="clearCompare"
+          >
+            Clear
+          </button>
+        </div>
         <CandlestickChart
           v-if="kind === 'candle'"
           :candles="focusCandles"
           :height="340"
         />
-        <PriceChart v-else :series="heroSeries" :kind="kind" :height="340" />
+        <PriceChart
+          v-else
+          :series="heroSeries"
+          :overlays="overlays"
+          :primary-label="focusInfo?.base ?? focus"
+          :kind="kind"
+          :height="340"
+        />
         <template #footer>
           <div class="flex items-center gap-[10px] text-xs text-ink-mute">
             <span class="w-2 h-2 rounded-full inline-block bg-up"></span>
@@ -347,10 +445,41 @@ const recentActivity = computed(() =>
         </template>
       </ChartCard>
     </div>
+
+    <ChartCard
+      title="Market map"
+      eyebrow="24h change"
+      subtitle="Tile size by volume · color by % change · click to focus"
+    >
+      <MarketHeatmap :tiles="heatTiles" :height="380" @select="setFocus" />
+      <template #footer>
+        <div class="flex items-center gap-3 text-[10px] uppercase tracking-[0.14em] text-ink-mute font-mono flex-wrap">
+          <span class="inline-flex items-center gap-[6px]">
+            <span class="w-[10px] h-[10px] inline-block" style="background: var(--down)"></span>
+            -5% or worse
+          </span>
+          <span class="inline-flex items-center gap-[6px]">
+            <span class="w-[10px] h-[10px] inline-block border border-border" style="background: var(--surface)"></span>
+            flat
+          </span>
+          <span class="inline-flex items-center gap-[6px]">
+            <span class="w-[10px] h-[10px] inline-block" style="background: var(--up)"></span>
+            +5% or better
+          </span>
+          <span class="w-px h-[10px] bg-rule"></span>
+          <span>{{ heatTiles.length }} markets</span>
+        </div>
+      </template>
+    </ChartCard>
   </div>
 </template>
 
 <style scoped>
+.compare-chip.is-on {
+  color: var(--ink);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
 @media (max-width: 1180px) {
   .ov-hero {
     grid-template-columns: 1fr;
