@@ -150,10 +150,6 @@ Real-time dashboards live or die on frame budget. TAPE applies several layers:
 - **Synthetic feed is opt-in only:** prevents users from accidentally evaluating the UI against fake data when live fails. Failure is surfaced explicitly via the status pill and offline indicator.
 - **TanStack Virtual over TanStack Query for the feed:** the activity feed is an in-memory ring buffer (no server pagination), so the problem is rendering weight, not fetching. Virtual solves that directly with windowed rendering. Query would only help if we ever expose paginated history beyond the in-memory cap.
 
-## Deployment
-
-`vercel.json` ships a SPA rewrite so deep links (`/markets/BTCUSDT`, `/activity`) resolve correctly. The build output in `dist/` is static and can be served from any host.
-
 ## Scripts reference
 
 | Command          | Purpose                                              |
