@@ -81,7 +81,7 @@ const DENSITY_OPTS: { value: Density; label: string }[] = [
             class="inline-flex items-center gap-[6px] h-7 px-3 border border-border rounded-1 text-xs uppercase tracking-[0.08em] text-ink-mute bg-surface transition-colors hover:text-ink hover:border-border-hi disabled:opacity-55 disabled:cursor-not-allowed"
             :class="dataMode === 'live' ? '!text-ink !border-accent !bg-accent-soft' : ''"
             :disabled="!liveEnabled"
-            :title="liveEnabled ? '' : 'Disabled — ships in v0.2'"
+            :title="liveEnabled ? '' : 'Disabled, ships in v0.2'"
             @click="setData('live')"
           >
             Live
@@ -120,8 +120,8 @@ const DENSITY_OPTS: { value: Density; label: string }[] = [
     <section class="flex flex-col gap-3 p-5 border border-dashed border-border rounded-1 text-ink-dim text-md leading-[1.6]">
       <h3 class="m-0 font-display italic text-2xl text-ink">About TAPE</h3>
       <p class="m-0">
-        <strong>TAPE</strong> is a live markets terminal — built for the trader
-        who wants the speed and clarity of a desk setup, on a single screen.
+        <strong>TAPE</strong> is a live markets terminal, built for the trader
+        who wants the speed and clarity of a desk setup on a single screen.
         Every metric, chart, and feed updates in real time, optimized so the
         browser doesn't break a sweat.
       </p>

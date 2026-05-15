@@ -73,13 +73,13 @@ function isActive(symbol: string) {
           </span>
           <span class="inline-flex flex-col items-end gap-[1px]">
             <span class="text-sm text-ink font-mono">
-              {{ r.ticker ? formatPrice(r.ticker.price) : '—' }}
+              {{ r.ticker ? formatPrice(r.ticker.price) : '-' }}
             </span>
             <span
               class="text-xs font-mono"
               :class="r.ticker && r.ticker.changePct24h >= 0 ? 'up' : 'down'"
             >
-              {{ r.ticker ? formatPct(r.ticker.changePct24h) : '—' }}
+              {{ r.ticker ? formatPct(r.ticker.changePct24h) : '-' }}
             </span>
           </span>
         </RouterLink>

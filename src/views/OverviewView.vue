@@ -142,7 +142,7 @@ const recentActivity = computed(() =>
           Markets, <em class="italic text-accent [text-shadow:0_0_22px_var(--accent-soft)]">live</em>.
         </h1>
         <p class="m-0 max-w-[44ch] text-ink-dim text-lg leading-[1.5]">
-          A streaming terminal for retail traders who want pro-grade signal —
+          A streaming terminal for retail traders who want pro-grade signal,
           without the seven-monitor setup. Watch order flow, momentum, and
           microstructure breathe in real time.
         </p>
@@ -315,7 +315,7 @@ const recentActivity = computed(() =>
             <span class="mono text-ink-mute">
               {{ Math.round(msgsPerSec) }} msg/s ·
               {{ Math.max(1, Math.round(latencyMs || 32)) }} ms latency ·
-              {{ focusTicker ? '$' + formatPrice(focusTicker.price) : '—' }}
+              {{ focusTicker ? '$' + formatPrice(focusTicker.price) : '-' }}
             </span>
           </div>
         </template>

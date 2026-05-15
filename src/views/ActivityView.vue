@@ -25,7 +25,7 @@ const filtered = computed(() =>
       <span class="eyebrow">The Tape</span>
       <h1 class="display m-0 text-[clamp(40px,6vw,64px)]">Activity, in order.</h1>
       <p class="m-0 text-ink-dim text-lg max-w-[60ch]">
-        Every alert, signal, and notable trade for the markets you watch —
+        Every alert, signal, and notable trade for the markets you watch,
         newest first. Filter by severity or search by symbol.
       </p>
     </header>

@@ -137,13 +137,6 @@ function isActive(item: { to: string; match?: string }) {
         </button>
         <StatusPill class="top-pill" :state="pillState" :latency-ms="latency" />
         <ThemeToggle />
-        <RouterLink
-          to="/settings"
-          class="avatar w-8 h-8 inline-flex items-center justify-center border border-border bg-surface font-mono text-[10px] tracking-[0.06em] text-ink-dim transition-colors hover:text-ink hover:border-accent"
-          aria-label="Open settings"
-        >
-          <span>TA</span>
-        </RouterLink>
       </div>
     </div>
 
@@ -208,9 +201,6 @@ function isActive(item: { to: string; match?: string }) {
   }
   .hamburger {
     display: inline-flex;
-  }
-  .avatar {
-    display: none;
   }
   .nav-strip {
     display: none;

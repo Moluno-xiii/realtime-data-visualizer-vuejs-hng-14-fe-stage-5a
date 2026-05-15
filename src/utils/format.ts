@@ -1,5 +1,5 @@
 export function formatPrice(n: number): string {
-  if (!Number.isFinite(n)) return '—'
+  if (!Number.isFinite(n)) return '-'
   if (n >= 1000)
     return n.toLocaleString('en-US', {
       maximumFractionDigits: 2,
@@ -17,7 +17,7 @@ export function formatPrice(n: number): string {
 }
 
 export function formatCompact(n: number): string {
-  if (!Number.isFinite(n)) return '—'
+  if (!Number.isFinite(n)) return '-'
   return Intl.NumberFormat('en-US', {
     notation: 'compact',
     maximumFractionDigits: 2,
@@ -25,13 +25,13 @@ export function formatCompact(n: number): string {
 }
 
 export function formatPct(n: number, withSign = true): string {
-  if (!Number.isFinite(n)) return '—'
+  if (!Number.isFinite(n)) return '-'
   const sign = withSign && n > 0 ? '+' : ''
   return `${sign}${n.toFixed(2)}%`
 }
 
 export function formatSigned(n: number, digits = 2): string {
-  if (!Number.isFinite(n)) return '—'
+  if (!Number.isFinite(n)) return '-'
   const sign = n > 0 ? '+' : n < 0 ? '−' : ''
   return `${sign}${Math.abs(n).toFixed(digits)}`
 }
