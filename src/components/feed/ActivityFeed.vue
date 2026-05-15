@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useVirtualizer } from '@tanstack/vue-virtual'
 import type { ActivityEvent, Severity } from '@/types/market'
 import ActivityRow from './ActivityRow.vue'
 
@@ -11,6 +12,9 @@ const props = withDefaults(
   }>(),
   { compact: false, showFilters: true },
 )
+
+const ROW_HEIGHT = 40
+const STICK_THRESHOLD = ROW_HEIGHT * 2
 
 const q = ref('')
 const sev = ref<Set<Severity>>(new Set())
@@ -40,6 +44,36 @@ const filtered = computed(() => {
       e.kind.includes(term)
     )
   })
+})
+
+const scrollerRef = ref<HTMLElement | null>(null)
+
+const rowVirtualizer = useVirtualizer(
+  computed(() => ({
+    count: filtered.value.length,
+    getScrollElement: () => scrollerRef.value,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 8,
+    getItemKey: (i: number) => filtered.value[i]?.id ?? i,
+  })),
+)
+
+const virtualItems = computed(() => rowVirtualizer.value.getVirtualItems())
+const totalSize = computed(() => rowVirtualizer.value.getTotalSize())
+
+watch(
+  () => props.events,
+  (next, prev) => {
+    if (!prev || !scrollerRef.value) return
+    const grew = next.length - prev.length
+    if (grew <= 0) return
+    if (scrollerRef.value.scrollTop < STICK_THRESHOLD) return
+    scrollerRef.value.scrollTop += grew * ROW_HEIGHT
+  },
+)
+
+watch([q, sev], () => {
+  if (scrollerRef.value) scrollerRef.value.scrollTop = 0
 })
 
 const now = ref(Date.now())
@@ -93,13 +127,32 @@ onBeforeUnmount(() => {
         </button>
       </div>
     </div>
-    <ul
+    <div
       v-if="filtered.length"
-      class="list-none m-0 p-0 overflow-y-auto flex-1 min-h-0 [contain:content]"
-      role="list"
+      ref="scrollerRef"
+      class="overflow-y-auto flex-1 min-h-0 [contain:strict]"
     >
-      <ActivityRow v-for="e in filtered" :key="e.id" :event="e" :now="now" />
-    </ul>
+      <ul
+        class="list-none m-0 p-0 relative"
+        :style="{ height: `${totalSize}px` }"
+        role="list"
+      >
+        <ActivityRow
+          v-for="virt in virtualItems"
+          :key="String(virt.key)"
+          :event="filtered[virt.index]!"
+          :now="now"
+          :style="{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: `${ROW_HEIGHT}px`,
+            transform: `translateY(${virt.start}px)`,
+          }"
+        />
+      </ul>
+    </div>
     <div
       v-else
       class="flex flex-col items-center justify-center gap-2 py-10 px-4 text-center text-ink-mute text-sm"

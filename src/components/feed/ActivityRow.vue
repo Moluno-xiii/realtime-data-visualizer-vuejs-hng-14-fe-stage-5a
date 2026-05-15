@@ -25,7 +25,7 @@ const dotColor = computed(() => {
 
 <template>
   <li
-    class="grid grid-cols-[8px_44px_64px_1fr_auto] items-center gap-[10px] px-[14px] py-2 border-t border-rule text-sm text-ink-dim transition-colors hover:bg-surface-hi hover:text-ink first:border-t-0"
+    class="grid grid-cols-[8px_44px_64px_1fr_auto] items-center gap-[10px] px-[14px] h-10 border-t border-rule text-sm text-ink-dim transition-colors hover:bg-surface-hi hover:text-ink first:border-t-0 box-border"
   >
     <span class="w-[6px] h-[6px] rounded-full justify-self-center" :class="dotColor"></span>
     <span class="font-mono tabular-nums text-xs text-ink-mute">{{ rel }}</span>

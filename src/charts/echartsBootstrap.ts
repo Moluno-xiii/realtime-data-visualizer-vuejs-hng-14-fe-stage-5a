@@ -4,6 +4,7 @@ import {
   LineChart,
   BarChart,
   CandlestickChart,
+  TreemapChart,
 } from 'echarts/charts'
 import {
   GridComponent,
@@ -23,6 +24,7 @@ export function bootstrapECharts() {
     LineChart,
     BarChart,
     CandlestickChart,
+    TreemapChart,
     GridComponent,
     TooltipComponent,
     LegendComponent,
@@ -53,6 +55,52 @@ export function chartPalette() {
     surface: cssVar('--surface', '#181614'),
     border: cssVar('--border', '#2a2724'),
   }
+}
+
+const COMPARE_COLORS = [
+  '#7fd5ff',
+  '#ff9d4d',
+  '#c084fc',
+  '#f472b6',
+  '#facc15',
+  '#34d399',
+  '#fb7185',
+  '#a3e635',
+] as const
+
+export function compareColor(index: number): string {
+  return COMPARE_COLORS[index % COMPARE_COLORS.length]!
+}
+
+function clamp01(n: number): number {
+  if (n <= 0) return 0
+  if (n >= 1) return 1
+  return n
+}
+
+function parseHex(hex: string): [number, number, number] | null {
+  const m = hex.trim().match(/^#?([0-9a-f]{6})$/i)
+  if (!m) return null
+  const v = parseInt(m[1]!, 16)
+  return [(v >> 16) & 0xff, (v >> 8) & 0xff, v & 0xff]
+}
+
+function mix(a: [number, number, number], b: [number, number, number], t: number): string {
+  const c = clamp01(t)
+  const r = Math.round(a[0] + (b[0] - a[0]) * c)
+  const g = Math.round(a[1] + (b[1] - a[1]) * c)
+  const bl = Math.round(a[2] + (b[2] - a[2]) * c)
+  return `rgb(${r}, ${g}, ${bl})`
+}
+
+export function heatColor(pct: number, scale = 5): string {
+  const p = chartPalette()
+  const neutral = parseHex(p.surface) ?? [24, 22, 20]
+  const up = parseHex(p.up) ?? [127, 232, 160]
+  const down = parseHex(p.down) ?? [255, 107, 107]
+  const intensity = clamp01(Math.abs(pct) / scale)
+  if (pct >= 0) return mix(neutral, up, intensity)
+  return mix(neutral, down, intensity)
 }
 
 export function baseGrid(opts?: {
